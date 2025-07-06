@@ -1,110 +1,131 @@
-import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { colors, fonts, fontSizes, spacing } from '@/constants';
+import { ScrollView, StyleSheet, Text, View } from 'react-native';
+import { SafeAreaView } from 'react-native-safe-area-context';
 
-import { Collapsible } from '@/components/Collapsible';
-import { ExternalLink } from '@/components/ExternalLink';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
-import { IconSymbol } from '@/components/ui/IconSymbol';
-
-export default function TabTwoScreen() {
+export default function ExploreScreen() {
   return (
-    <ParallaxScrollView
-      headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
-      headerImage={
-        <IconSymbol
-          size={310}
-          color="#808080"
-          name="chevron.left.forwardslash.chevron.right"
-          style={styles.headerImage}
-        />
-      }>
-      <ThemedView style={styles.titleContainer}>
-        <ThemedText type="title">Explore</ThemedText>
-      </ThemedView>
-      <ThemedText>This app includes example code to help you get started.</ThemedText>
-      <Collapsible title="File-based routing">
-        <ThemedText>
-          This app has two screens:{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">app/(tabs)/explore.tsx</ThemedText>
-        </ThemedText>
-        <ThemedText>
-          The layout file in <ThemedText type="defaultSemiBold">app/(tabs)/_layout.tsx</ThemedText>{' '}
-          sets up the tab navigator.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/router/introduction">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Android, iOS, and web support">
-        <ThemedText>
-          You can open this project on Android, iOS, and the web. To open the web version, press{' '}
-          <ThemedText type="defaultSemiBold">w</ThemedText> in the terminal running this project.
-        </ThemedText>
-      </Collapsible>
-      <Collapsible title="Images">
-        <ThemedText>
-          For static images, you can use the <ThemedText type="defaultSemiBold">@2x</ThemedText> and{' '}
-          <ThemedText type="defaultSemiBold">@3x</ThemedText> suffixes to provide files for
-          different screen densities
-        </ThemedText>
-        <Image source={require('@/assets/images/react-logo.png')} style={{ alignSelf: 'center' }} />
-        <ExternalLink href="https://reactnative.dev/docs/images">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Custom fonts">
-        <ThemedText>
-          Open <ThemedText type="defaultSemiBold">app/_layout.tsx</ThemedText> to see how to load{' '}
-          <ThemedText style={{ fontFamily: 'SpaceMono' }}>
-            custom fonts such as this one.
-          </ThemedText>
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/versions/latest/sdk/font">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Light and dark mode components">
-        <ThemedText>
-          This template has light and dark mode support. The{' '}
-          <ThemedText type="defaultSemiBold">useColorScheme()</ThemedText> hook lets you inspect
-          what the user&apos;s current color scheme is, and so you can adjust UI colors accordingly.
-        </ThemedText>
-        <ExternalLink href="https://docs.expo.dev/develop/user-interface/color-themes/">
-          <ThemedText type="link">Learn more</ThemedText>
-        </ExternalLink>
-      </Collapsible>
-      <Collapsible title="Animations">
-        <ThemedText>
-          This template includes an example of an animated component. The{' '}
-          <ThemedText type="defaultSemiBold">components/HelloWave.tsx</ThemedText> component uses
-          the powerful <ThemedText type="defaultSemiBold">react-native-reanimated</ThemedText>{' '}
-          library to create a waving hand animation.
-        </ThemedText>
-        {Platform.select({
-          ios: (
-            <ThemedText>
-              The <ThemedText type="defaultSemiBold">components/ParallaxScrollView.tsx</ThemedText>{' '}
-              component provides a parallax effect for the header image.
-            </ThemedText>
-          ),
-        })}
-      </Collapsible>
-    </ParallaxScrollView>
+    <SafeAreaView style={styles.container}>
+      <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
+        {/* Header */}
+        <View style={styles.header}>
+          <Text style={styles.title}>Explore</Text>
+          <Text style={styles.subtitle}>Discover courts and matches near you</Text>
+        </View>
+
+        {/* Search Section */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Search</Text>
+          <View style={styles.placeholder}>
+            <Text style={styles.placeholderText}>Search bar will be here</Text>
+          </View>
+        </View>
+
+        {/* Sports Categories */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Sports</Text>
+          <View style={styles.categoriesGrid}>
+            <View style={styles.categoryCard}>
+              <Text style={styles.categoryTitle}>⚽ Soccer</Text>
+            </View>
+            <View style={styles.categoryCard}>
+              <Text style={styles.categoryTitle}>🏀 Basketball</Text>
+            </View>
+            <View style={styles.categoryCard}>
+              <Text style={styles.categoryTitle}>🎾 Tennis</Text>
+            </View>
+            <View style={styles.categoryCard}>
+              <Text style={styles.categoryTitle}>🏐 Volleyball</Text>
+            </View>
+          </View>
+        </View>
+
+        {/* Nearby Facilities */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Nearby Facilities</Text>
+          <View style={styles.placeholder}>
+            <Text style={styles.placeholderText}>Map and facility list will appear here</Text>
+          </View>
+        </View>
+
+        {/* Open Matches */}
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>Open Matches</Text>
+          <View style={styles.placeholder}>
+            <Text style={styles.placeholderText}>Available matches you can join</Text>
+          </View>
+        </View>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  headerImage: {
-    color: '#808080',
-    bottom: -90,
-    left: -35,
-    position: 'absolute',
+  container: {
+    flex: 1,
+    backgroundColor: colors.light,
   },
-  titleContainer: {
+  scrollView: {
+    flex: 1,
+  },
+  header: {
+    padding: spacing.lg,
+    paddingTop: spacing.md,
+  },
+  title: {
+    fontSize: fontSizes.heading,
+    fontFamily: fonts.bold,
+    color: colors.primary,
+    marginBottom: spacing.xs,
+  },
+  subtitle: {
+    fontSize: fontSizes.md,
+    fontFamily: fonts.regular,
+    color: colors.secondary,
+  },
+  section: {
+    marginBottom: spacing.lg,
+    paddingHorizontal: spacing.lg,
+  },
+  sectionTitle: {
+    fontSize: fontSizes.xl,
+    fontFamily: fonts.semibold,
+    color: colors.primary,
+    marginBottom: spacing.md,
+  },
+  categoriesGrid: {
     flexDirection: 'row',
-    gap: 8,
+    flexWrap: 'wrap',
+    gap: spacing.md,
+  },
+  categoryCard: {
+    backgroundColor: colors.white,
+    padding: spacing.lg,
+    borderRadius: 12,
+    shadowColor: colors.black,
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.1,
+    shadowRadius: 4,
+    elevation: 3,
+    minWidth: '45%',
+    alignItems: 'center',
+  },
+  categoryTitle: {
+    fontSize: fontSizes.md,
+    fontFamily: fonts.semibold,
+    color: colors.primary,
+  },
+  placeholder: {
+    backgroundColor: colors.lightEventsBg,
+    padding: spacing.lg,
+    borderRadius: 12,
+    alignItems: 'center',
+    justifyContent: 'center',
+    minHeight: 100,
+  },
+  placeholderText: {
+    fontSize: fontSizes.md,
+    fontFamily: fonts.regular,
+    color: colors.secondary,
+    textAlign: 'center',
   },
 });

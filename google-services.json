@@ -1,0 +1,62 @@
+{
+  "project_info": {
+    "project_number": "589872331000",
+    "project_id": "qick-86a7c",
+    "storage_bucket": "qick-86a7c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:589872331000:android:0e2a90ad34dfdff234e30d",
+        "android_client_info": {
+          "package_name": "com.futbolito.qick"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "589872331000-3qk4hd475jdofbfftl40dv3q043c2711.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.futbolito.qick",
+            "certificate_hash": "637835381940f53df30964a5ecfa72036b02d76d"
+          }
+        },
+        {
+          "client_id": "589872331000-a65q46n8ckvte18s462sijipi301a7ra.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.futbolito.qick",
+            "certificate_hash": "81433100cab33cc1c5289b9c904754107a18c4cc"
+          }
+        },
+        {
+          "client_id": "589872331000-2pv0flu0nt5dcu0mpuv3qucpchoad5c6.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAwfCR6Bn3GLc_MLr5U4q5Bxmo213o8Kv0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "589872331000-2pv0flu0nt5dcu0mpuv3qucpchoad5c6.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "589872331000-johhcfka0kdt3efjj31j2ekp9oanj4sp.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.futbolito.qick"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
