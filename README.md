@@ -1,6 +1,37 @@
-# Welcome to your Expo app 👋
+# Qick Mobile App
 
 This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+
+## Environment Configuration
+
+The app uses environment variables for configuration. Set up your environment by copying the example file:
+
+```bash
+# For development
+cp .env.example .env
+
+# Or use specific environment files
+cp .env.development .env    # For development
+cp .env.production .env     # For production
+```
+
+### Environment Variables
+
+- `EXPO_PUBLIC_API_KEY` - Firebase API key
+- `EXPO_PUBLIC_AUTH_DOMAIN` - Firebase auth domain
+- `EXPO_PUBLIC_PROJECT_ID` - Firebase project ID
+- `EXPO_PUBLIC_STORAGE_BUCKET` - Firebase storage bucket
+- `EXPO_PUBLIC_MESSAGING_SENDER_ID` - Firebase messaging sender ID
+- `EXPO_PUBLIC_APP_ID` - Firebase app ID
+- `EXPO_PUBLIC_BASEURL` - Backend API base URL
+- `EXPO_PUBLIC_ENVIRONMENT` - Environment name (development/staging/production)
+
+### Environment Files Available
+
+- `.env.example` - Template with staging configuration
+- `.env.development` - Development configuration (local API)
+- `.env.production` - Production configuration template
+- `.env` - Your local environment file (gitignored)
 
 ## Get started
 
@@ -10,10 +41,17 @@ This is an [Expo](https://expo.dev) project created with [`create-expo-app`](htt
    npm install
    ```
 
-2. Start the app
+2. Set up environment variables
 
    ```bash
-   npx expo start
+   cp .env.example .env
+   # Edit .env with your configuration
+   ```
+
+3. Start the app
+
+   ```bash
+    npx expo start
    ```
 
 In the output, you'll find options to open the app in a

@@ -1,4 +1,4 @@
-import { getRequest, patchRequest, postRequest } from "../../methods";
+import { instance } from '../../instance';
 
 // Authentication endpoint paths
 const AUTH_ENDPOINTS = {
@@ -16,7 +16,7 @@ const AUTH_ENDPOINTS = {
   APPLE_LOGIN: "/auth/apple",
 } as const;
 
-// Type definitions for authentication requests
+// Request/Response Type Definitions
 export interface LoginRequest {
   email?: string;
   phone?: string;
@@ -24,157 +24,75 @@ export interface LoginRequest {
 }
 
 export interface SignupRequest {
-  name: string;
-  email?: string;
-  phone?: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
   password: string;
 }
 
-export interface VerifyOTPRequest {
-  phone?: string;
+export interface OTPVerificationRequest {
   email?: string;
+  phone?: string;
   otp: string;
 }
 
-export interface GoogleLoginRequest {
-  idToken: string;
+export interface ResendOTPRequest {
+  email?: string;
+  phone?: string;
 }
 
-export interface AppleLoginRequest {
-  identityToken: string;
-  user?: {
-    name?: {
-      firstName: string;
-      lastName: string;
-    };
-    email?: string;
-  };
+export interface RefreshTokenRequest {
+  refreshToken: string;
 }
 
-// Authentication API functions
+export interface UpdateProfileRequest {
+  firstName?: string;
+  lastName?: string;
+  email?: string;
+  phone?: string;
+  avatar?: string;
+}
+
+// API Functions
 export const authAPI = {
-  /**
-   * Login with email/phone and password
-   */
+  // Login with email or phone
   login: async (data: LoginRequest) => {
-    return postRequest<{
-      user: any;
-      token: string;
-      refreshToken: string;
-    }>({
-      endpoint: AUTH_ENDPOINTS.LOGIN,
-      body: data,
-    });
+    return await instance.post('/auth/login', data);
   },
 
-  /**
-   * Sign up new user
-   */
+  // User registration
   signup: async (data: SignupRequest) => {
-    return postRequest<{
-      user: any;
-      token: string;
-      message: string;
-    }>({
-      endpoint: AUTH_ENDPOINTS.SIGNUP,
-      body: data,
-    });
+    return await instance.post('/auth/signup', data);
   },
 
-  /**
-   * Verify OTP for phone/email verification
-   */
-  verifyOTP: async (data: VerifyOTPRequest) => {
-    return postRequest<{
-      user: any;
-      token: string;
-      message: string;
-    }>({
-      endpoint: AUTH_ENDPOINTS.VERIFY_OTP,
-      body: data,
-    });
+  // OTP verification
+  verifyOTP: async (data: OTPVerificationRequest) => {
+    return await instance.post('/auth/verify-otp', data);
   },
 
-  /**
-   * Resend OTP
-   */
-  resendOTP: async (identifier: { phone?: string; email?: string }) => {
-    return postRequest<{ message: string }>({
-      endpoint: AUTH_ENDPOINTS.RESEND_OTP,
-      body: identifier,
-    });
+  // Resend OTP
+  resendOTP: async (data: ResendOTPRequest) => {
+    return await instance.post('/auth/resend-otp', data);
   },
 
-  /**
-   * Google Sign In
-   */
-  googleLogin: async (data: GoogleLoginRequest) => {
-    return postRequest<{
-      user: any;
-      token: string;
-      refreshToken: string;
-    }>({
-      endpoint: AUTH_ENDPOINTS.GOOGLE_LOGIN,
-      body: data,
-    });
-  },
-
-  /**
-   * Apple Sign In
-   */
-  appleLogin: async (data: AppleLoginRequest) => {
-    return postRequest<{
-      user: any;
-      token: string;
-      refreshToken: string;
-    }>({
-      endpoint: AUTH_ENDPOINTS.APPLE_LOGIN,
-      body: data,
-    });
-  },
-
-  /**
-   * Get user profile
-   */
+  // Get user profile
   getProfile: async () => {
-    return getRequest<{ user: any }>({
-      endpoint: AUTH_ENDPOINTS.PROFILE,
-    });
+    return await instance.get('/auth/profile');
   },
 
-  /**
-   * Update user profile
-   */
-  updateProfile: async (data: Partial<any>) => {
-    return patchRequest<{
-      user: any;
-      message: string;
-    }>({
-      endpoint: AUTH_ENDPOINTS.UPDATE_PROFILE,
-      body: data,
-    });
+  // Update user profile
+  updateProfile: async (data: UpdateProfileRequest) => {
+    return await instance.put('/auth/profile', data);
   },
 
-  /**
-   * Refresh access token
-   */
-  refreshToken: async (refreshToken: string) => {
-    return postRequest<{
-      token: string;
-      refreshToken: string;
-    }>({
-      endpoint: AUTH_ENDPOINTS.REFRESH_TOKEN,
-      body: { refreshToken },
-    });
+  // Refresh authentication token
+  refreshToken: async (data: RefreshTokenRequest) => {
+    return await instance.post('/auth/refresh-token', data);
   },
 
-  /**
-   * Logout user
-   */
+  // Logout
   logout: async () => {
-    return postRequest<{ message: string }>({
-      endpoint: AUTH_ENDPOINTS.LOGOUT,
-      body: {},
-    });
+    return await instance.post('/auth/logout');
   },
 }; 

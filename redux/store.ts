@@ -4,7 +4,7 @@ import { FLUSH, PAUSE, PERSIST, persistReducer, persistStore, PURGE, REGISTER, R
 import { bookingFieldReducer } from "./booking/reducer";
 import { facilityReducer } from "./facility/reducer";
 import { homeReducer } from "./home/reducer";
-import { userReducer } from "./user/reducer";
+import userReducer from "./user/reducer";
 
 const appReducer = combineReducers({
     userReducer,

@@ -1,35 +1,32 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 
-interface UserData {
-  _id?: string;
-  email?: string;
-  name?: string;
-  phone?: string;
+export interface UserData {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
   avatar?: string;
-  isVerified?: boolean;
-  role?: string;
-  skills?: any;
-  stats?: any;
-  preferences?: any;
+  isVerified: boolean;
   token?: string;
 }
 
 interface UserState {
-  userData: UserData | null;
-  token: string | null;
-  refreshToken: string | null;
   isAuthenticated: boolean;
+  userData: UserData | null;
   isLoading: boolean;
   error: string | null;
+  token: string | null;
+  refreshToken: string | null;
 }
 
 const initialState: UserState = {
-  userData: null,
-  token: null,
-  refreshToken: null,
   isAuthenticated: false,
+  userData: null,
   isLoading: false,
   error: null,
+  token: null,
+  refreshToken: null,
 };
 
 const userSlice = createSlice({
@@ -40,28 +37,59 @@ const userSlice = createSlice({
       state.isLoading = true;
       state.error = null;
     },
-    loginSuccess: (state, action: PayloadAction<{ userData: UserData; token: string; refreshToken?: string }>) => {
+    loginSuccess: (state, action: PayloadAction<{
+      userData: UserData;
+      token: string;
+      refreshToken: string;
+    }>) => {
       state.isLoading = false;
-      state.userData = { ...action.payload.userData, token: action.payload.token };
-      state.token = action.payload.token;
-      state.refreshToken = action.payload.refreshToken || null;
       state.isAuthenticated = true;
+      state.userData = action.payload.userData;
+      state.token = action.payload.token;
+      state.refreshToken = action.payload.refreshToken;
       state.error = null;
     },
     loginFailure: (state, action: PayloadAction<string>) => {
       state.isLoading = false;
-      state.error = action.payload;
       state.isAuthenticated = false;
-    },
-    logout: (state) => {
       state.userData = null;
       state.token = null;
       state.refreshToken = null;
-      state.isAuthenticated = false;
-      state.isLoading = false;
+      state.error = action.payload;
+    },
+    signupStart: (state) => {
+      state.isLoading = true;
       state.error = null;
     },
-    updateUserData: (state, action: PayloadAction<Partial<UserData>>) => {
+    signupSuccess: (state, action: PayloadAction<{
+      userData: UserData;
+      token: string;
+      refreshToken: string;
+    }>) => {
+      state.isLoading = false;
+      state.isAuthenticated = true;
+      state.userData = action.payload.userData;
+      state.token = action.payload.token;
+      state.refreshToken = action.payload.refreshToken;
+      state.error = null;
+    },
+    signupFailure: (state, action: PayloadAction<string>) => {
+      state.isLoading = false;
+      state.isAuthenticated = false;
+      state.userData = null;
+      state.token = null;
+      state.refreshToken = null;
+      state.error = action.payload;
+    },
+    logout: (state) => {
+      state.isAuthenticated = false;
+      state.userData = null;
+      state.token = null;
+      state.refreshToken = null;
+      state.error = null;
+      state.isLoading = false;
+    },
+    updateProfile: (state, action: PayloadAction<Partial<UserData>>) => {
       if (state.userData) {
         state.userData = { ...state.userData, ...action.payload };
       }
@@ -79,10 +107,13 @@ export const {
   loginStart,
   loginSuccess,
   loginFailure,
+  signupStart,
+  signupSuccess,
+  signupFailure,
   logout,
-  updateUserData,
+  updateProfile,
   clearError,
   setLoading,
 } = userSlice.actions;
 
-export const userReducer = userSlice.reducer; 
+export default userSlice.reducer; 
