@@ -17,8 +17,8 @@ export const AuthGuard: React.FC<AuthGuardProps> = ({
 
   React.useEffect(() => {
     if (requireAuth && !isAuthenticated) {
-      // Redirect to onboarding/login if not authenticated
-      router.replace('/onboarding');
+      // Redirect to welcome if not authenticated
+      router.replace('/welcome');
     } else if (!requireAuth && isAuthenticated) {
       // Redirect to main app if already authenticated
       router.replace('/(tabs)');

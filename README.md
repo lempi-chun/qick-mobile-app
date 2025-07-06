@@ -51,7 +51,7 @@ cp .env.production .env     # For production
 3. Start the app
 
    ```bash
-    npx expo start
+   npx expo start
    ```
 
 In the output, you'll find options to open the app in a

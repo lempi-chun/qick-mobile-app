@@ -4,19 +4,19 @@
  */
 
 export const fonts = {
-  medium: "PJSMedium",
-  bold: "PJSBold",
-  regular: "PJSRegular",
-  light: "PJSLight",
-  semibold: "PJSSemibold",
-  extrabold: "PJSExtrabold",
-  italics: "PJSItalics",
-  lightItalic: "PJSLightItalic",
-  extraLightItalic: "PJSExtraLightItalic",
-  mediumItalic: "PJSMediumItalic",
-  semiBoldItalic: "PJSSemiBoldItalic",
-  boldItalic: "PJSBoldItalic",
-  extraBoldItalic: "PJSExtraBoldItalic",
+  medium: "PlusJakartaSans-Medium",
+  bold: "PlusJakartaSans-Bold",
+  regular: "PlusJakartaSans-Regular",
+  light: "PlusJakartaSans-Light",
+  semibold: "PlusJakartaSans-SemiBold",
+  extrabold: "PlusJakartaSans-ExtraBold",
+  italic: "PlusJakartaSans-Italic",
+  lightItalic: "PlusJakartaSans-LightItalic",
+  extraLightItalic: "PlusJakartaSans-ExtraLightItalic",
+  mediumItalic: "PlusJakartaSans-MediumItalic",
+  semiBoldItalic: "PlusJakartaSans-SemiBoldItalic",
+  boldItalic: "PlusJakartaSans-BoldItalic",
+  extraBoldItalic: "PlusJakartaSans-ExtraBoldItalic",
 };
 
 // Font sizes for consistent typography

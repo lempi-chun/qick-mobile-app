@@ -1,5 +1,5 @@
-import { AppButton, AppText } from '@/components/ui';
-import { colors, fonts, spacing } from '@/constants';
+import { AppText } from '@/components/ui';
+import { colors, fonts } from '@/constants';
 import { RootState } from '@/redux/store';
 import { AntDesign, Ionicons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -15,7 +15,7 @@ import {
   useWindowDimensions,
   View,
 } from 'react-native';
-import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useSelector } from 'react-redux';
 
 const dummySoccerCourtsData = [
@@ -123,40 +123,19 @@ export default function HomeScreen() {
     return remainingDatesAndDays;
   }
 
-  // If not authenticated, show welcome screen
+  // If not authenticated, redirect to welcome screen
+  useEffect(() => {
+    if (!isAuthenticated) {
+      router.replace('/welcome');
+    }
+  }, [isAuthenticated]);
+
+  // Show loading or empty state while redirecting
   if (!isAuthenticated) {
     return (
-      <SafeAreaView style={styles.container}>
-        <ScrollView contentContainerStyle={styles.content}>
-          <View style={styles.welcomeContainer}>
-            <Image 
-              source={require('@/assets/banner.png')} 
-              style={styles.welcomeImage}
-              resizeMode="contain"
-            />
-            <AppText variant="heading" weight="bold" color={colors.primary} style={styles.welcomeTitle}>
-              Welcome to Qick
-            </AppText>
-            <AppText variant="body" color={colors.secondary} style={styles.welcomeSubtitle}>
-              Your ultimate sports companion for booking facilities, joining matches, and connecting with players
-            </AppText>
-            
-            <View style={styles.authButtons}>
-              <AppButton
-                title="Get Started"
-                onPress={() => router.push('/onboarding')}
-                style={styles.primaryButton}
-              />
-              <AppButton
-                title="I have an account"
-                variant="outline"
-                onPress={() => router.push('/auth/login')}
-                style={styles.secondaryButton}
-              />
-            </View>
-          </View>
-        </ScrollView>
-      </SafeAreaView>
+      <View style={styles.loadingContainer}>
+        <AppText>Loading...</AppText>
+      </View>
     );
   }
 
@@ -221,16 +200,10 @@ export default function HomeScreen() {
                 ]}
                 onPress={() => setSelectedDate(item)}
               >
-                <AppText style={[
-                  styles.dateText,
-                  selectedDate?.date === item.date && styles.selectedDateText
-                ]}>
+                <AppText style={selectedDate?.date === item.date ? styles.selectedDateText : styles.dateText}>
                   {item.date}
                 </AppText>
-                <AppText style={[
-                  styles.dayText,
-                  selectedDate?.date === item.date && styles.selectedDayText
-                ]}>
+                <AppText style={selectedDate?.date === item.date ? styles.selectedDayText : styles.dayText}>
                   {item.dayName.substring(0, 3)}
                 </AppText>
               </TouchableOpacity>
@@ -295,45 +268,11 @@ export default function HomeScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.white,
-  },
-  content: {
-    flexGrow: 1,
-    paddingHorizontal: spacing.lg,
-  },
-  
-  // Welcome Screen Styles
-  welcomeContainer: {
+  loadingContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
-    paddingVertical: spacing.xxl,
-  },
-  welcomeImage: {
-    width: '100%',
-    height: 250,
-    marginBottom: spacing.xl,
-  },
-  welcomeTitle: {
-    textAlign: 'center',
-    marginBottom: spacing.md,
-  },
-  welcomeSubtitle: {
-    textAlign: 'center',
-    marginBottom: spacing.xxl,
-    lineHeight: 22,
-  },
-  authButtons: {
-    width: '100%',
-    gap: spacing.md,
-  },
-  primaryButton: {
-    width: '100%',
-  },
-  secondaryButton: {
-    width: '100%',
+    backgroundColor: colors.white,
   },
 
   // Authenticated Home Screen Styles
@@ -400,6 +339,8 @@ const styles = StyleSheet.create({
   },
   selectedTabText: {
     color: colors.primary,
+    fontFamily: fonts.medium,
+    fontSize: 14,
   },
   datePickerContainer: {
     marginBottom: 20,
@@ -422,6 +363,8 @@ const styles = StyleSheet.create({
   },
   selectedDateText: {
     color: colors.primary,
+    fontFamily: fonts.bold,
+    fontSize: 18,
   },
   dayText: {
     fontFamily: fonts.regular,
@@ -431,6 +374,9 @@ const styles = StyleSheet.create({
   },
   selectedDayText: {
     color: colors.primary,
+    fontFamily: fonts.regular,
+    fontSize: 12,
+    marginTop: 5,
   },
   contentContainer: {
     flex: 1,

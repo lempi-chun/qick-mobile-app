@@ -1,7 +1,7 @@
 import { colors } from '@/constants';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { persistor, store } from '@/redux/store';
-import { DarkTheme, DefaultTheme, ThemeProvider } from '@react-navigation/native';
+import { DefaultTheme, ThemeProvider } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
@@ -42,10 +42,24 @@ export default function RootLayout() {
     return null;
   }
 
+  // Custom theme to avoid default blue colors
+  const customTheme = {
+    ...DefaultTheme,
+    colors: {
+      ...DefaultTheme.colors,
+      primary: colors.lime,
+      background: colors.white,
+      card: colors.white,
+      text: colors.primary,
+      border: colors.secondaryTenPercent,
+      notification: colors.lime,
+    },
+  };
+
   return (
     <Provider store={store}>
       <PersistGate loading={null} persistor={persistor}>
-        <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
+    <ThemeProvider value={customTheme}>
           <Stack
             screenOptions={{
               headerShown: false,
@@ -54,11 +68,11 @@ export default function RootLayout() {
           >
             <Stack.Screen name="(tabs)" />
             <Stack.Screen name="auth" />
-            <Stack.Screen name="onboarding" />
-            <Stack.Screen name="+not-found" />
-          </Stack>
-          <StatusBar style="auto" />
-        </ThemeProvider>
+            <Stack.Screen name="welcome" />
+        <Stack.Screen name="+not-found" />
+      </Stack>
+      <StatusBar style="light" backgroundColor="transparent" />
+    </ThemeProvider>
       </PersistGate>
     </Provider>
   );
