@@ -2,7 +2,9 @@ import { AppText } from '@/components/ui';
 import { colors, fonts } from '@/constants';
 import { AntDesign } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import i18n from 'i18next';
 import { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
   Dimensions,
   Image,
@@ -17,28 +19,29 @@ import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 const { width, height } = Dimensions.get('screen');
 
-const welcomeSteps = [
-  {
-    id: 1,
-    title: 'Book a Field',
-    backgroundImage: require('@/assets/Welcome/screen-1.png'),
-  },
-  {
-    id: 2,
-    title: 'Invite Your Friends',
-    backgroundImage: require('@/assets/Welcome/screen-2.png'),
-  },
-  {
-    id: 3,
-    title: 'Split The Bill',
-    backgroundImage: require('@/assets/Welcome/screen-3.png'),
-  },
-];
-
 export default function WelcomeScreen() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const insets = useSafeAreaInsets();
+  const { t } = useTranslation('welcome');
+
+  const welcomeSteps = [
+    {
+      id: 1,
+      title: t('steps.bookField'),
+      backgroundImage: require('@/assets/Welcome/screen-1.png'),
+    },
+    {
+      id: 2,
+      title: t('steps.inviteFriends'),
+      backgroundImage: require('@/assets/Welcome/screen-2.png'),
+    },
+    {
+      id: 3,
+      title: t('steps.splitBill'),
+      backgroundImage: require('@/assets/Welcome/screen-3.png'),
+    },
+  ];
 
   const handleNext = () => {
     if (currentStep < welcomeSteps.length - 1) {
@@ -49,7 +52,14 @@ export default function WelcomeScreen() {
     }
   };
 
+  const handleLanguageChange = () => {
+    const currentLanguage = i18n.language;
+    const newLanguage = currentLanguage === 'en' ? 'es' : 'en';
+    i18n.changeLanguage(newLanguage);
+  };
+
   const currentStepData = welcomeSteps[currentStep];
+  const currentLanguage = i18n.language;
 
   return (
     <ImageBackground 
@@ -59,7 +69,9 @@ export default function WelcomeScreen() {
     >
       <StatusBar backgroundColor="transparent" translucent barStyle="light-content" />
       
-              {/* Status Bar Overlay */}
+      {/* Page Content */}
+      <View style={styles.pageContent}>
+        {/* Status Bar Overlay */}
         <View style={[styles.statusBarOverlay, { paddingTop: insets.top }]}>
           {/* Progress Bar */}
           <View style={styles.progressContainer}>
@@ -76,52 +88,55 @@ export default function WelcomeScreen() {
 
           {/* Language Selector */}
           <View style={styles.languageSelectorContainer}>
-            <TouchableOpacity style={styles.languageSelector}>
-              <AppText style={styles.languageText}>English</AppText>
+            <TouchableOpacity style={styles.languageSelector} onPress={handleLanguageChange}>
+              <AppText style={styles.languageText}>
+                {currentLanguage === 'en' ? t('language.english') : t('language.spanish')}
+              </AppText>
               <AntDesign name="down" size={12} color={colors.white} />
             </TouchableOpacity>
           </View>
         </View>
 
-      {/* Content */}
-      <View style={styles.content}>
-        {/* qick Logo - Static, always visible */}
-        <View style={styles.logoContainer}>
-          <Image 
-            source={require('@/assets/logo.png')} 
-            style={styles.logo}
-            resizeMode="contain"
-          />
-          
-          {/* Step Title - Under Logo */}
-          <View style={styles.titleContainer}>
-            <AppText style={styles.stepTitle}>
-              {currentStepData.title}
-            </AppText>
+        {/* Content */}
+        <View style={styles.content}>
+          {/* qick Logo - Static, always visible */}
+          <View style={styles.logoContainer}>
+            <Image 
+              source={require('@/assets/logo.png')} 
+              style={styles.logo}
+              resizeMode="contain"
+            />
+            
+            {/* Step Title - Under Logo */}
+            <View style={styles.titleContainer}>
+              <AppText style={styles.stepTitle}>
+                {currentStepData.title}
+              </AppText>
+            </View>
           </View>
         </View>
-      </View>
 
-      {/* Bottom Section */}
-      <View style={styles.bottomSection}>
-        {/* Let's Go Button */}
-        <TouchableOpacity style={styles.letsGoButton} onPress={handleNext}>
-          <AppText style={styles.letsGoButtonText}>
-            Let's Go
-          </AppText>
-        </TouchableOpacity>
+        {/* Bottom Section */}
+        <View style={styles.bottomSection}>
+          {/* Let's Go Button */}
+          <TouchableOpacity style={styles.letsGoButton} onPress={handleNext}>
+            <AppText style={styles.letsGoButtonText}>
+              {t('button.letsGo')}
+            </AppText>
+          </TouchableOpacity>
 
-        {/* Step Indicator */}
-        <View style={styles.stepIndicator}>
-          {welcomeSteps.map((_, index) => (
-            <View
-              key={index}
-              style={[
-                styles.stepDot,
-                index === currentStep && styles.stepDotActive
-              ]}
-            />
-          ))}
+          {/* Step Indicator */}
+          <View style={styles.stepIndicator}>
+            {welcomeSteps.map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.stepDot,
+                  index === currentStep && styles.stepDotActive
+                ]}
+              />
+            ))}
+          </View>
         </View>
       </View>
     </ImageBackground>
@@ -238,5 +253,8 @@ const styles = StyleSheet.create({
   titleContainer: {
     alignItems: 'center',
     marginTop: 0,
+  },
+  pageContent: {
+    flex: 1,
   },
 }); 

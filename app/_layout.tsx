@@ -6,16 +6,18 @@ import { useFonts } from 'expo-font';
 import { Stack } from 'expo-router';
 import * as SplashScreen from 'expo-splash-screen';
 import { StatusBar } from 'expo-status-bar';
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import 'react-native-reanimated';
 import { Provider } from 'react-redux';
 import { PersistGate } from 'redux-persist/integration/react';
+import initI18n from '../i18n';
 
 // Prevent the splash screen from auto-hiding before asset loading is complete.
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
   const colorScheme = useColorScheme();
+  const [i18nInitialized, setI18nInitialized] = useState(false);
   const [loaded] = useFonts({
     'PlusJakartaSans-Light': require('../assets/fonts/Light.ttf'),
     'PlusJakartaSans-Regular': require('../assets/fonts/Regular.ttf'),
@@ -33,12 +35,26 @@ export default function RootLayout() {
   });
 
   useEffect(() => {
-    if (loaded) {
+    const initializeI18n = async () => {
+      try {
+        await initI18n();
+        setI18nInitialized(true);
+      } catch (error) {
+        console.error('Failed to initialize i18n:', error);
+        setI18nInitialized(true); // Continue anyway
+      }
+    };
+
+    initializeI18n();
+  }, []);
+
+  useEffect(() => {
+    if (loaded && i18nInitialized) {
       SplashScreen.hideAsync();
     }
-  }, [loaded]);
+  }, [loaded, i18nInitialized]);
 
-  if (!loaded) {
+  if (!loaded || !i18nInitialized) {
     return null;
   }
 

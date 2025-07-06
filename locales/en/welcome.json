@@ -1,0 +1,14 @@
+{
+  "steps": {
+    "bookField": "Book a Field",
+    "inviteFriends": "Invite Your Friends",
+    "splitBill": "Split The Bill"
+  },
+  "button": {
+    "letsGo": "Let's Go"
+  },
+  "language": {
+    "english": "English",
+    "spanish": "Spanish"
+  }
+} 

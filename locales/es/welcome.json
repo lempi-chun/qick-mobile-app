@@ -1,0 +1,14 @@
+{
+  "steps": {
+    "bookField": "Reservar un Campo",
+    "inviteFriends": "Invita a tus Amigos",
+    "splitBill": "Dividir la Cuenta"
+  },
+  "button": {
+    "letsGo": "¡Vamos!"
+  },
+  "language": {
+    "english": "Inglés",
+    "spanish": "Español"
+  }
+} 
