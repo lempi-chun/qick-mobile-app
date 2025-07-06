@@ -3,8 +3,10 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 // Import translation files
+import enAuth from '../locales/en/auth.json';
 import enCommon from '../locales/en/common.json';
 import enWelcome from '../locales/en/welcome.json';
+import esAuth from '../locales/es/auth.json';
 import esCommon from '../locales/es/common.json';
 import esWelcome from '../locales/es/welcome.json';
 
@@ -12,10 +14,12 @@ const resources = {
   en: {
     welcome: enWelcome,
     common: enCommon,
+    auth: enAuth,
   },
   es: {
     welcome: esWelcome,
     common: esCommon,
+    auth: esAuth,
   },
 };
 

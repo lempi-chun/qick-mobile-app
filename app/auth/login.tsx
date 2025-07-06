@@ -15,7 +15,6 @@ import {
   useWindowDimensions,
   View
 } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
 
 export default function LoginScreen() {
@@ -28,12 +27,12 @@ export default function LoginScreen() {
     email: '',
     password: '',
   });
-  const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [hidePassword, setHidePassword] = useState(true);
 
   const validateForm = () => {
-    const errors: {[key: string]: string} = {};
-    
+    const errors: { [key: string]: string } = {};
+
     if (!formData.email.trim()) {
       errors.email = 'Email Address is Required';
     } else {
@@ -42,11 +41,11 @@ export default function LoginScreen() {
         errors.email = 'Please enter valid email';
       }
     }
-    
+
     if (!formData.password) {
       errors.password = 'Password cannot be empty!';
     }
-    
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -63,7 +62,7 @@ export default function LoginScreen() {
       };
 
       const response = await authAPI.login(loginData);
-      
+
       dispatch(loginSuccess({
         userData: response.data.user,
         token: response.data.token,
@@ -71,7 +70,7 @@ export default function LoginScreen() {
       }));
 
       router.replace('/(tabs)');
-      
+
     } catch (error: any) {
       dispatch(loginFailure(error.message || 'Login failed'));
     }
@@ -82,26 +81,21 @@ export default function LoginScreen() {
   };
 
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.light }]}>
-      <StatusBar backgroundColor="transparent" barStyle="dark-content" />
+    <View style={[styles.container, { backgroundColor: colors.light }]}>
+      <StatusBar backgroundColor={colors.light} barStyle="dark-content" />
       <ScrollView
         contentContainerStyle={{ flexGrow: 1 }}
         keyboardDismissMode="interactive"
         showsVerticalScrollIndicator={false}
       >
-        {/* APP ICON AND NAME */}
-        <View style={styles.logoContainer}>
-          <AppText style={styles.logoText}>qick</AppText>
-        </View>
-
         {/* TITLE */}
         <AppText style={styles.mainTitle}>
-          Play, book, score.
+          Book, play, score.
         </AppText>
 
         {/* SUBTITLE */}
         <AppText style={styles.subtitle}>
-          Spend less time organizing a match and more time playing.
+          Book a field, invite your friends and split the bill in seconds.
         </AppText>
 
         {/* EMAIL INPUT */}
@@ -172,16 +166,16 @@ export default function LoginScreen() {
           </AppText>
           <View style={styles.termsRow}>
             <AppText style={styles.termsText}> qick's </AppText>
-                         <TouchableOpacity>
-               <AppText style={{
-                 fontSize: 12,
-                 color: colors.secondary,
-                 fontFamily: fonts.regular,
-                 textDecorationLine: 'underline',
-               }}>
-                 Terms of Service and Privacy Policy.
-               </AppText>
-             </TouchableOpacity>
+            <TouchableOpacity>
+              <AppText style={{
+                fontSize: 12,
+                color: colors.secondary,
+                fontFamily: fonts.regular,
+                textDecorationLine: 'underline',
+              }}>
+                Terms of Service and Privacy Policy.
+              </AppText>
+            </TouchableOpacity>
           </View>
         </View>
 
@@ -199,7 +193,7 @@ export default function LoginScreen() {
           </TouchableOpacity>
         </View>
       </ScrollView>
-    </SafeAreaView>
+    </View>
   );
 }
 
@@ -211,7 +205,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'flex-start',
     alignItems: 'center',
-    marginTop: 10,
+    marginTop: 60,
     marginLeft: 20,
     gap: 5,
   },
@@ -225,7 +219,8 @@ const styles = StyleSheet.create({
     fontSize: 48,
     color: colors.primary,
     marginLeft: 20,
-    marginTop: 40,
+    marginTop: 100,
+    lineHeight: 55,
   },
   subtitle: {
     color: colors.secondary,
@@ -233,7 +228,8 @@ const styles = StyleSheet.create({
     fontFamily: fonts.regular,
     marginLeft: 20,
     marginRight: 20,
-    marginTop: 10,
+    marginTop: 20,
+
   },
   inputContainer: {
     flexDirection: 'row',
@@ -245,7 +241,7 @@ const styles = StyleSheet.create({
     borderColor: colors.secondaryThirtyPercent,
     height: 67,
     width: '90%',
-    marginTop: 20,
+    marginTop: 30,
     borderRadius: 16,
     paddingHorizontal: 20,
     alignSelf: 'center',
@@ -328,11 +324,11 @@ const styles = StyleSheet.create({
     color: colors.secondary,
     fontFamily: fonts.regular,
   },
-     termsRow: {
-     flexDirection: 'row',
-   },
+  termsRow: {
+    flexDirection: 'row',
+  },
   footer: {
-    height: 80,
+    height: 100,
     backgroundColor: colors.secondaryTenPercent,
     flexDirection: 'row',
     justifyContent: 'center',
