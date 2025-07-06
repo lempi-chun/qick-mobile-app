@@ -4,7 +4,6 @@ import { AntDesign } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-  Animated,
   Dimensions,
   Image,
   ImageBackground,
@@ -40,46 +39,10 @@ export default function WelcomeScreen() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
   const insets = useSafeAreaInsets();
-  
-  // Animation values
-  const slideAnimation = new Animated.Value(0);
-  const fadeAnimation = new Animated.Value(1);
 
   const handleNext = () => {
     if (currentStep < welcomeSteps.length - 1) {
-      // Start slide out animation
-      Animated.parallel([
-        Animated.timing(slideAnimation, {
-          toValue: -width,
-          duration: 300,
-          useNativeDriver: true,
-        }),
-        Animated.timing(fadeAnimation, {
-          toValue: 0,
-          duration: 150,
-          useNativeDriver: true,
-        }),
-      ]).start(() => {
-        // Update step
-        setCurrentStep(currentStep + 1);
-        
-        // Reset position for slide in
-        slideAnimation.setValue(width);
-        
-        // Start slide in animation
-        Animated.parallel([
-          Animated.timing(slideAnimation, {
-            toValue: 0,
-            duration: 300,
-            useNativeDriver: true,
-          }),
-          Animated.timing(fadeAnimation, {
-            toValue: 1,
-            duration: 150,
-            useNativeDriver: true,
-          }),
-        ]).start();
-      });
+      setCurrentStep(currentStep + 1);
     } else {
       // Navigate to login after last step
       router.replace('/auth/login');
@@ -96,27 +59,29 @@ export default function WelcomeScreen() {
     >
       <StatusBar backgroundColor="transparent" translucent barStyle="light-content" />
       
-      {/* Status Bar Overlay */}
-      <View style={[styles.statusBarOverlay, { paddingTop: insets.top }]}>
-        {/* Progress Bar */}
-        <View style={styles.progressContainer}>
-          {welcomeSteps.map((_, index) => (
-            <View
-              key={index}
-              style={[
-                styles.progressSegment,
-                index <= currentStep && styles.progressSegmentActive
-              ]}
-            />
-          ))}
-        </View>
+              {/* Status Bar Overlay */}
+        <View style={[styles.statusBarOverlay, { paddingTop: insets.top }]}>
+          {/* Progress Bar */}
+          <View style={styles.progressContainer}>
+            {welcomeSteps.map((_, index) => (
+              <View
+                key={index}
+                style={[
+                  styles.progressSegment,
+                  index <= currentStep && styles.progressSegmentActive
+                ]}
+              />
+            ))}
+          </View>
 
-        {/* Language Selector */}
-        <TouchableOpacity style={styles.languageSelector}>
-          <AppText style={styles.languageText}>English</AppText>
-          <AntDesign name="down" size={12} color={colors.white} />
-        </TouchableOpacity>
-      </View>
+          {/* Language Selector */}
+          <View style={styles.languageSelectorContainer}>
+            <TouchableOpacity style={styles.languageSelector}>
+              <AppText style={styles.languageText}>English</AppText>
+              <AntDesign name="down" size={12} color={colors.white} />
+            </TouchableOpacity>
+          </View>
+        </View>
 
       {/* Content */}
       <View style={styles.content}>
@@ -128,20 +93,12 @@ export default function WelcomeScreen() {
             resizeMode="contain"
           />
           
-          {/* Animated Step Title - Under Logo */}
-          <Animated.View 
-            style={[
-              styles.titleContainer,
-              {
-                transform: [{ translateX: slideAnimation }],
-                opacity: fadeAnimation,
-              }
-            ]}
-          >
+          {/* Step Title - Under Logo */}
+          <View style={styles.titleContainer}>
             <AppText style={styles.stepTitle}>
               {currentStepData.title}
             </AppText>
-          </Animated.View>
+          </View>
         </View>
       </View>
 
@@ -184,7 +141,7 @@ const styles = StyleSheet.create({
   progressContainer: {
     flexDirection: 'row',
     gap: 8,
-    marginBottom: 20,
+    marginBottom: 15,
   },
   progressSegment: {
     flex: 1,
@@ -195,13 +152,18 @@ const styles = StyleSheet.create({
   progressSegmentActive: {
     backgroundColor: colors.white,
   },
+  languageSelectorContainer: {
+    alignItems: 'flex-end',
+    marginBottom: 20,
+  },
   languageSelector: {
-    position: 'absolute',
-    right: 20,
-    top: 15,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 5,
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 8,
+    borderRadius: 20,
   },
   languageText: {
     color: colors.white,
@@ -213,7 +175,7 @@ const styles = StyleSheet.create({
     justifyContent: 'flex-start',
     alignItems: 'center',
     paddingHorizontal: 40,
-    paddingTop: 60,
+    paddingTop: 20,
   },
   logoContainer: {
     alignItems: 'center',
