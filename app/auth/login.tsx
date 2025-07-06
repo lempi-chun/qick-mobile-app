@@ -1,17 +1,19 @@
 import { authAPI, LoginRequest } from '@/apiServices/endpoints/authentication';
-import { AppButton, AppInput, AppText } from '@/components/ui';
-import { borderRadius, colors, spacing } from '@/constants';
+import { AppText } from '@/components/ui';
+import { colors, fonts } from '@/constants';
 import { RootState } from '@/redux/store';
 import { loginFailure, loginStart, loginSuccess } from '@/redux/user/reducer';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import {
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    TouchableOpacity,
-    View
+  ScrollView,
+  StatusBar,
+  StyleSheet,
+  TextInput,
+  TouchableOpacity,
+  useWindowDimensions,
+  View
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { useDispatch, useSelector } from 'react-redux';
@@ -19,33 +21,30 @@ import { useDispatch, useSelector } from 'react-redux';
 export default function LoginScreen() {
   const router = useRouter();
   const dispatch = useDispatch();
+  const { width } = useWindowDimensions();
   const { isLoading, error } = useSelector((state: RootState) => state.userReducer);
 
   const [formData, setFormData] = useState({
-    identifier: '', // email or phone
+    email: '',
     password: '',
   });
   const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
+  const [hidePassword, setHidePassword] = useState(true);
 
   const validateForm = () => {
     const errors: {[key: string]: string} = {};
     
-    if (!formData.identifier.trim()) {
-      errors.identifier = 'Email or phone number is required';
+    if (!formData.email.trim()) {
+      errors.email = 'Email Address is Required';
     } else {
-      // Basic email or phone validation
       const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const phonePattern = /^\+?[\d\s\-\(\)]{10,}$/;
-      
-      if (!emailPattern.test(formData.identifier) && !phonePattern.test(formData.identifier)) {
-        errors.identifier = 'Please enter a valid email or phone number';
+      if (!emailPattern.test(formData.email)) {
+        errors.email = 'Please enter valid email';
       }
     }
     
     if (!formData.password) {
-      errors.password = 'Password is required';
-    } else if (formData.password.length < 6) {
-      errors.password = 'Password must be at least 6 characters';
+      errors.password = 'Password cannot be empty!';
     }
     
     setFormErrors(errors);
@@ -58,27 +57,19 @@ export default function LoginScreen() {
     try {
       dispatch(loginStart());
 
-      // Determine if identifier is email or phone
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      const isEmail = emailPattern.test(formData.identifier);
-
       const loginData: LoginRequest = {
+        email: formData.email,
         password: formData.password,
-        ...(isEmail 
-          ? { email: formData.identifier }
-          : { phone: formData.identifier }
-        ),
       };
 
       const response = await authAPI.login(loginData);
       
       dispatch(loginSuccess({
-        userData: response.user,
-        token: response.token,
-        refreshToken: response.refreshToken,
+        userData: response.data.user,
+        token: response.data.token,
+        refreshToken: response.data.refreshToken,
       }));
 
-      // Navigate to main app
       router.replace('/(tabs)');
       
     } catch (error: any) {
@@ -86,94 +77,128 @@ export default function LoginScreen() {
     }
   };
 
-  const handleForgotPassword = () => {
-    router.push('/auth/forgot-password');
-  };
-
-  const handleSignUp = () => {
-    router.push('/auth/signup');
+  const toggleHidePassword = () => {
+    setHidePassword(!hidePassword);
   };
 
   return (
-    <SafeAreaView style={styles.container}>
-      <KeyboardAvoidingView
-        style={styles.keyboardView}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.light }]}>
+      <StatusBar backgroundColor="transparent" barStyle="dark-content" />
+      <ScrollView
+        contentContainerStyle={{ flexGrow: 1 }}
+        keyboardDismissMode="interactive"
+        showsVerticalScrollIndicator={false}
       >
-        <ScrollView style={styles.scrollView} showsVerticalScrollIndicator={false}>
-          <View style={styles.content}>
-            {/* Header */}
-            <View style={styles.header}>
-              <AppText variant="heading" weight="bold" color={colors.primary}>
-                Welcome Back
-              </AppText>
-              <AppText variant="body" color={colors.secondary} style={styles.subtitle}>
-                Sign in to continue playing
-              </AppText>
-            </View>
+        {/* APP ICON AND NAME */}
+        <View style={styles.logoContainer}>
+          <AppText style={styles.logoText}>qick</AppText>
+        </View>
 
-            {/* Form */}
-            <View style={styles.form}>
-              <AppInput
-                label="Email or Phone"
-                value={formData.identifier}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, identifier: text }))}
-                placeholder="Enter your email or phone number"
-                keyboardType="email-address"
-                autoCapitalize="none"
-                autoComplete="email"
-                error={formErrors.identifier}
-                required
-              />
+        {/* TITLE */}
+        <AppText style={styles.mainTitle}>
+          Play, book, score.
+        </AppText>
 
-              <AppInput
-                label="Password"
-                value={formData.password}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, password: text }))}
-                placeholder="Enter your password"
-                secureTextEntry
-                autoComplete="password"
-                error={formErrors.password}
-                required
-              />
+        {/* SUBTITLE */}
+        <AppText style={styles.subtitle}>
+          Spend less time organizing a match and more time playing.
+        </AppText>
 
-              <TouchableOpacity onPress={handleForgotPassword} style={styles.forgotPassword}>
-                <AppText variant="body" color={colors.lime}>
-                  Forgot Password?
-                </AppText>
-              </TouchableOpacity>
+        {/* EMAIL INPUT */}
+        <View style={styles.inputContainer}>
+          <TextInput
+            style={[styles.textInput, formErrors.email && styles.inputError]}
+            onChangeText={(text) => setFormData(prev => ({ ...prev, email: text.trim().toLowerCase() }))}
+            value={formData.email}
+            keyboardType="email-address"
+            returnKeyType="next"
+            placeholder="Email Address"
+            placeholderTextColor={colors.secondary}
+          />
+        </View>
+        {formErrors.email && (
+          <AppText style={styles.errorText}>{formErrors.email}</AppText>
+        )}
 
-              {error && (
-                <View style={styles.errorContainer}>
-                  <AppText variant="caption" color={colors.red}>
-                    {error}
-                  </AppText>
-                </View>
-              )}
+        {/* PASSWORD INPUT */}
+        <View style={styles.passwordContainer}>
+          <TextInput
+            style={styles.passwordInput}
+            value={formData.password}
+            onChangeText={(text) => setFormData(prev => ({ ...prev, password: text.trim() }))}
+            secureTextEntry={hidePassword}
+            placeholder="Password"
+            placeholderTextColor={colors.secondary}
+          />
+          <TouchableOpacity
+            onPress={toggleHidePassword}
+            style={styles.passwordToggle}
+          >
+            <MaterialIcons
+              name={hidePassword ? "visibility-off" : "visibility"}
+              size={24}
+              color={colors.secondary}
+            />
+          </TouchableOpacity>
+        </View>
+        {formErrors.password && (
+          <AppText style={styles.errorText}>{formErrors.password}</AppText>
+        )}
 
-              <AppButton
-                title="Sign In"
-                onPress={handleLogin}
-                loading={isLoading}
-                disabled={isLoading}
-                style={styles.loginButton}
-              />
-            </View>
+        {/* SIGN IN BUTTON */}
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.signInButton}
+            onPress={handleLogin}
+            disabled={isLoading}
+          >
+            <AppText style={styles.signInButtonText}>
+              {isLoading ? 'Signing In...' : 'Sign In'}
+            </AppText>
+          </TouchableOpacity>
+        </View>
 
-            {/* Sign Up Link */}
-            <View style={styles.signUpContainer}>
-              <AppText variant="body" color={colors.secondary}>
-                Don't have an account?{' '}
-              </AppText>
-              <TouchableOpacity onPress={handleSignUp}>
-                <AppText variant="body" weight="semibold" color={colors.lime}>
-                  Sign Up
-                </AppText>
-              </TouchableOpacity>
-            </View>
+        {/* FORGOT PASSWORD */}
+        <TouchableOpacity>
+          <AppText style={styles.forgotPassword}>
+            Forgot your password?
+          </AppText>
+        </TouchableOpacity>
+
+        {/* TERMS OF SERVICE */}
+        <View style={styles.termsContainer}>
+          <AppText style={styles.termsText}>
+            By logging in, you confirm that you have read and accept
+          </AppText>
+          <View style={styles.termsRow}>
+            <AppText style={styles.termsText}> qick's </AppText>
+                         <TouchableOpacity>
+               <AppText style={{
+                 fontSize: 12,
+                 color: colors.secondary,
+                 fontFamily: fonts.regular,
+                 textDecorationLine: 'underline',
+               }}>
+                 Terms of Service and Privacy Policy.
+               </AppText>
+             </TouchableOpacity>
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
+        </View>
+
+        <View style={{ flex: 1, marginVertical: 20 }} />
+
+        {/* FOOTER */}
+        <View style={[styles.footer, { width }]}>
+          <AppText style={styles.footerText}>
+            Don't have an account?
+          </AppText>
+          <TouchableOpacity onPress={() => router.push('/auth/signup')}>
+            <AppText style={styles.footerLink}>
+              Sign Up
+            </AppText>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -181,47 +206,147 @@ export default function LoginScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: colors.white,
   },
-  keyboardView: {
-    flex: 1,
-  },
-  scrollView: {
-    flex: 1,
-  },
-  content: {
-    flex: 1,
-    padding: spacing.lg,
-  },
-  header: {
+  logoContainer: {
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
     alignItems: 'center',
-    marginBottom: spacing.xxl,
-    marginTop: spacing.xl,
+    marginTop: 10,
+    marginLeft: 20,
+    gap: 5,
+  },
+  logoText: {
+    fontFamily: fonts.bold,
+    color: colors.clock,
+    fontSize: 23,
+  },
+  mainTitle: {
+    fontFamily: fonts.bold,
+    fontSize: 48,
+    color: colors.primary,
+    marginLeft: 20,
+    marginTop: 40,
   },
   subtitle: {
-    marginTop: spacing.sm,
-    textAlign: 'center',
+    color: colors.secondary,
+    fontSize: 14,
+    fontFamily: fonts.regular,
+    marginLeft: 20,
+    marginRight: 20,
+    marginTop: 10,
   },
-  form: {
-    marginBottom: spacing.xl,
-  },
-  forgotPassword: {
-    alignSelf: 'flex-end',
-    marginBottom: spacing.lg,
-  },
-  errorContainer: {
-    backgroundColor: colors.red + '10',
-    padding: spacing.sm,
-    borderRadius: borderRadius.sm,
-    marginBottom: spacing.md,
-  },
-  loginButton: {
-    marginTop: spacing.md,
-  },
-  signUpContainer: {
+  inputContainer: {
     flexDirection: 'row',
     justifyContent: 'center',
     alignItems: 'center',
-    marginTop: spacing.xl,
+  },
+  textInput: {
+    borderWidth: 1,
+    borderColor: colors.secondaryThirtyPercent,
+    height: 67,
+    width: '90%',
+    marginTop: 20,
+    borderRadius: 16,
+    paddingHorizontal: 20,
+    alignSelf: 'center',
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    color: colors.secondary,
+  },
+  inputError: {
+    borderColor: colors.red,
+  },
+  passwordContainer: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: colors.secondaryThirtyPercent,
+    height: 67,
+    width: '90%',
+    marginTop: 15,
+    borderRadius: 16,
+    alignSelf: 'center',
+  },
+  passwordInput: {
+    flex: 1,
+    fontFamily: fonts.medium,
+    fontSize: 14,
+    color: colors.secondary,
+    height: '100%',
+    paddingHorizontal: 20,
+  },
+  passwordToggle: {
+    width: 40,
+    height: 40,
+    marginEnd: 10,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  errorText: {
+    fontSize: 10,
+    color: colors.red,
+    marginLeft: 45,
+    marginTop: 5,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    alignSelf: 'center',
+    marginTop: 20,
+    width: '90%',
+    justifyContent: 'space-between',
+  },
+  signInButton: {
+    flex: 1,
+    height: 60,
+    borderRadius: 30,
+    backgroundColor: colors.lime,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  signInButtonText: {
+    color: colors.primary,
+    fontFamily: fonts.medium,
+    fontSize: 16,
+  },
+  forgotPassword: {
+    marginTop: 20,
+    alignSelf: 'center',
+    fontFamily: fonts.medium,
+    fontSize: 16,
+    color: colors.footer,
+  },
+  termsContainer: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    alignSelf: 'center',
+    width: '90%',
+    marginTop: 20,
+  },
+  termsText: {
+    fontSize: 12,
+    color: colors.secondary,
+    fontFamily: fonts.regular,
+  },
+     termsRow: {
+     flexDirection: 'row',
+   },
+  footer: {
+    height: 80,
+    backgroundColor: colors.secondaryTenPercent,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 5,
+  },
+  footerText: {
+    color: colors.primary,
+    fontFamily: fonts.regular,
+    fontSize: 16,
+  },
+  footerLink: {
+    fontFamily: fonts.bold,
+    fontSize: 16,
+    color: colors.footer,
   },
 }); 
