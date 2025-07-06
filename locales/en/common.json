@@ -1,0 +1,13 @@
+{
+  "language": {
+    "english": "English",
+    "spanish": "Spanish",
+    "chooseLanguage": "Choose your language"
+  },
+  "button": {
+    "done": "Done",
+    "cancel": "Cancel",
+    "close": "Close",
+    "save": "Save"
+  }
+} 

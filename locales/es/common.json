@@ -1,0 +1,13 @@
+{
+  "language": {
+    "english": "Inglés",
+    "spanish": "Español",
+    "chooseLanguage": "Elige tu idioma"
+  },
+  "button": {
+    "done": "Listo",
+    "cancel": "Cancelar",
+    "close": "Cerrar",
+    "save": "Guardar"
+  }
+} 

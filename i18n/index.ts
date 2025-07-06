@@ -3,15 +3,19 @@ import i18n from 'i18next';
 import { initReactI18next } from 'react-i18next';
 
 // Import translation files
+import enCommon from '../locales/en/common.json';
 import enWelcome from '../locales/en/welcome.json';
+import esCommon from '../locales/es/common.json';
 import esWelcome from '../locales/es/welcome.json';
 
 const resources = {
   en: {
     welcome: enWelcome,
+    common: enCommon,
   },
   es: {
     welcome: esWelcome,
+    common: esCommon,
   },
 };
 

@@ -1,4 +1,4 @@
-import { AppText } from '@/components/ui';
+import { AppText, LanguageSelector } from '@/components';
 import { colors, fonts } from '@/constants';
 import { AntDesign } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
@@ -22,8 +22,10 @@ const { width, height } = Dimensions.get('screen');
 export default function WelcomeScreen() {
   const router = useRouter();
   const [currentStep, setCurrentStep] = useState(0);
+  const [languageModalVisible, setLanguageModalVisible] = useState(false);
   const insets = useSafeAreaInsets();
   const { t } = useTranslation('welcome');
+  const { t: tCommon } = useTranslation('common');
 
   const welcomeSteps = [
     {
@@ -52,94 +54,104 @@ export default function WelcomeScreen() {
     }
   };
 
-  const handleLanguageChange = () => {
-    const currentLanguage = i18n.language;
-    const newLanguage = currentLanguage === 'en' ? 'es' : 'en';
-    i18n.changeLanguage(newLanguage);
+  const handleLanguageDropdownPress = () => {
+    setLanguageModalVisible(true);
+  };
+
+  const handleLanguageModalClose = () => {
+    setLanguageModalVisible(false);
   };
 
   const currentStepData = welcomeSteps[currentStep];
   const currentLanguage = i18n.language;
 
   return (
-    <ImageBackground 
-      source={currentStepData.backgroundImage} 
-      style={styles.container}
-      resizeMode="cover"
-    >
-      <StatusBar backgroundColor="transparent" translucent barStyle="light-content" />
-      
-      {/* Page Content */}
-      <View style={styles.pageContent}>
-        {/* Status Bar Overlay */}
-        <View style={[styles.statusBarOverlay, { paddingTop: insets.top }]}>
-          {/* Progress Bar */}
-          <View style={styles.progressContainer}>
-            {welcomeSteps.map((_, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.progressSegment,
-                  index <= currentStep && styles.progressSegmentActive
-                ]}
+    <>
+      <ImageBackground 
+        source={currentStepData.backgroundImage} 
+        style={styles.container}
+        resizeMode="cover"
+      >
+        <StatusBar backgroundColor="transparent" translucent barStyle="light-content" />
+        
+        {/* Page Content */}
+        <View style={styles.pageContent}>
+          {/* Status Bar Overlay */}
+          <View style={[styles.statusBarOverlay, { paddingTop: insets.top }]}>
+            {/* Progress Bar */}
+            <View style={styles.progressContainer}>
+              {welcomeSteps.map((_, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.progressSegment,
+                    index <= currentStep && styles.progressSegmentActive
+                  ]}
+                />
+              ))}
+            </View>
+
+            {/* Language Selector */}
+            <View style={styles.languageSelectorContainer}>
+              <TouchableOpacity style={styles.languageSelector} onPress={handleLanguageDropdownPress}>
+                <AppText style={styles.languageText}>
+                  {currentLanguage === 'en' ? tCommon('language.english') : tCommon('language.spanish')}
+                </AppText>
+                <AntDesign name="down" size={12} color={colors.white} />
+              </TouchableOpacity>
+            </View>
+          </View>
+
+          {/* Content */}
+          <View style={styles.content}>
+            {/* qick Logo - Static, always visible */}
+            <View style={styles.logoContainer}>
+              <Image 
+                source={require('@/assets/logo.png')} 
+                style={styles.logo}
+                resizeMode="contain"
               />
-            ))}
+              
+              {/* Step Title - Under Logo */}
+              <View style={styles.titleContainer}>
+                <AppText style={styles.stepTitle}>
+                  {currentStepData.title}
+                </AppText>
+              </View>
+            </View>
           </View>
 
-          {/* Language Selector */}
-          <View style={styles.languageSelectorContainer}>
-            <TouchableOpacity style={styles.languageSelector} onPress={handleLanguageChange}>
-              <AppText style={styles.languageText}>
-                {currentLanguage === 'en' ? t('language.english') : t('language.spanish')}
+          {/* Bottom Section */}
+          <View style={styles.bottomSection}>
+            {/* Let's Go Button */}
+            <TouchableOpacity style={styles.letsGoButton} onPress={handleNext}>
+              <AppText style={styles.letsGoButtonText}>
+                {t('button.letsGo')}
               </AppText>
-              <AntDesign name="down" size={12} color={colors.white} />
             </TouchableOpacity>
-          </View>
-        </View>
 
-        {/* Content */}
-        <View style={styles.content}>
-          {/* qick Logo - Static, always visible */}
-          <View style={styles.logoContainer}>
-            <Image 
-              source={require('@/assets/logo.png')} 
-              style={styles.logo}
-              resizeMode="contain"
-            />
-            
-            {/* Step Title - Under Logo */}
-            <View style={styles.titleContainer}>
-              <AppText style={styles.stepTitle}>
-                {currentStepData.title}
-              </AppText>
+            {/* Step Indicator */}
+            <View style={styles.stepIndicator}>
+              {welcomeSteps.map((_, index) => (
+                <View
+                  key={index}
+                  style={[
+                    styles.stepDot,
+                    index === currentStep && styles.stepDotActive
+                  ]}
+                />
+              ))}
             </View>
           </View>
         </View>
+      </ImageBackground>
 
-        {/* Bottom Section */}
-        <View style={styles.bottomSection}>
-          {/* Let's Go Button */}
-          <TouchableOpacity style={styles.letsGoButton} onPress={handleNext}>
-            <AppText style={styles.letsGoButtonText}>
-              {t('button.letsGo')}
-            </AppText>
-          </TouchableOpacity>
-
-          {/* Step Indicator */}
-          <View style={styles.stepIndicator}>
-            {welcomeSteps.map((_, index) => (
-              <View
-                key={index}
-                style={[
-                  styles.stepDot,
-                  index === currentStep && styles.stepDotActive
-                ]}
-              />
-            ))}
-          </View>
-        </View>
-      </View>
-    </ImageBackground>
+      {/* Language Selector Modal */}
+      <LanguageSelector
+        visible={languageModalVisible}
+        onClose={handleLanguageModalClose}
+      />
+    </>
   );
 }
 
