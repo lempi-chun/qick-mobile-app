@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "qick-mobile-temp",
-    "slug": "qick-mobile-temp",
+    "name": "qick-mobile-app",
+    "slug": "qick-mobile-app",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
-    "scheme": "qickmobiletemp",
+    "scheme": "qickmobileapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
