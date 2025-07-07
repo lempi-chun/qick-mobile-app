@@ -29,7 +29,13 @@ export default function SignUp() {
   });
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [hidePassword, setHidePassword] = useState(true);
+  
+  // Validation states for each field
+  const [isFirstNameValid, setIsFirstNameValid] = useState(false);
+  const [isLastNameValid, setIsLastNameValid] = useState(false);
   const [isEmailValid, setIsEmailValid] = useState(false);
+  const [isPhoneValid, setIsPhoneValid] = useState(false);
+  
   const [countryCode, setCountryCode] = useState<CountryCode>('US');
   const [country, setCountry] = useState<Country>({
     cca2: 'US',
@@ -39,10 +45,29 @@ export default function SignUp() {
   } as Country);
   const [showCountryPicker, setShowCountryPicker] = useState(false);
 
+  // Validation functions
+  const validateFirstName = (firstName: string) => {
+    const isValid = firstName.trim().length >= 2;
+    setIsFirstNameValid(isValid);
+    return isValid;
+  };
+
+  const validateLastName = (lastName: string) => {
+    const isValid = lastName.trim().length >= 2;
+    setIsLastNameValid(isValid);
+    return isValid;
+  };
+
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     const isValid = emailRegex.test(email.trim());
     setIsEmailValid(isValid);
+    return isValid;
+  };
+
+  const validatePhone = (phone: string) => {
+    const isValid = phone.trim().length > 0;
+    setIsPhoneValid(isValid);
     return isValid;
   };
 
@@ -157,11 +182,21 @@ export default function SignUp() {
               value={formData.firstName}
               onChangeText={(text) => {
                 setFormData({ ...formData, firstName: text });
+                validateFirstName(text);
                 if (formErrors.firstName) {
                   setFormErrors({ ...formErrors, firstName: '' });
                 }
               }}
             />
+            {isFirstNameValid && (
+              <View style={styles.checkContainer}>
+                <MaterialIcons
+                  name="check-circle"
+                  size={24}
+                  color={colors.clock}
+                />
+              </View>
+            )}
           </View>
 
           {/* LAST NAME INPUT */}
@@ -173,11 +208,21 @@ export default function SignUp() {
               value={formData.lastName}
               onChangeText={(text) => {
                 setFormData({ ...formData, lastName: text });
+                validateLastName(text);
                 if (formErrors.lastName) {
                   setFormErrors({ ...formErrors, lastName: '' });
                 }
               }}
             />
+            {isLastNameValid && (
+              <View style={styles.checkContainer}>
+                <MaterialIcons
+                  name="check-circle"
+                  size={24}
+                  color={colors.clock}
+                />
+              </View>
+            )}
           </View>
 
           {/* EMAIL INPUT */}
@@ -198,7 +243,7 @@ export default function SignUp() {
               }}
             />
             {isEmailValid && (
-              <View style={styles.emailCheckContainer}>
+              <View style={styles.checkContainer}>
                 <MaterialIcons
                   name="check-circle"
                   size={24}
@@ -244,11 +289,21 @@ export default function SignUp() {
                 value={formData.phone}
                 onChangeText={(text) => {
                   setFormData({ ...formData, phone: text });
+                  validatePhone(text);
                   if (formErrors.phone) {
                     setFormErrors({ ...formErrors, phone: '' });
                   }
                 }}
               />
+              {isPhoneValid && (
+                <View style={styles.checkContainer}>
+                  <MaterialIcons
+                    name="check-circle"
+                    size={24}
+                    color={colors.clock}
+                  />
+                </View>
+              )}
             </View>
           </View>
 
@@ -302,6 +357,7 @@ export default function SignUp() {
               />
             </TouchableOpacity>
           </View>
+
           {/* TERMS */}
           <View style={styles.termsContainer}>
             <AppText style={styles.termsText}>
@@ -373,7 +429,7 @@ const styles = StyleSheet.create({
     fontSize: 52,
     fontFamily: fonts.bold,
     color: colors.primary,
-    marginLeft: 20,
+    marginHorizontal: 20,
     marginTop: 40,
     lineHeight: 60,
   },
@@ -381,21 +437,19 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: fonts.regular,
     color: colors.secondary,
-    marginLeft: 20,
-    marginRight: 20,
+    marginHorizontal: 20,
     marginTop: 20,
     marginBottom: 20,
   },
   inputContainer: {
     height: 67,
-    width: '90%',
     marginTop: 15,
     borderRadius: 16,
     paddingHorizontal: 20,
     backgroundColor: colors.white,
     borderColor: colors.secondaryThirtyPercent,
     borderWidth: 1,
-    marginLeft: 20,
+    marginHorizontal: 20,
     flexDirection: 'row',
     alignItems: 'center',
   },
@@ -414,8 +468,14 @@ const styles = StyleSheet.create({
   passwordToggle: {
     padding: 5,
   },
+  checkContainer: {
+    padding: 5,
+  },
   emailCheckContainer: {
     padding: 5,
+  },
+  locationInput: {
+    flex: 1,
   },
   inputError: {
     borderColor: colors.red,
@@ -424,18 +484,17 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: colors.red,
     fontFamily: fonts.regular,
-    marginLeft: 20,
+    marginHorizontal: 20,
     marginTop: 5,
   },
   signUpButton: {
     backgroundColor: colors.lime,
     height: 67,
-    width: '90%',
     borderRadius: 16,
     alignItems: 'center',
     justifyContent: 'center',
     marginTop: 60,
-    marginLeft: 20,
+    marginHorizontal: 20,
     marginBottom: 40,
   },
   signUpButtonText: {
@@ -445,8 +504,7 @@ const styles = StyleSheet.create({
   },
   termsContainer: {
     marginTop: 28,
-    marginLeft: 20,
-    marginRight: 20,
+    marginHorizontal: 20,
   },
   termsText: {
     fontSize: 14,
@@ -485,9 +543,8 @@ const styles = StyleSheet.create({
   },
   phoneRowContainer: {
     flexDirection: 'row',
-    width: '90%',
     marginTop: 15,
-    marginLeft: 20,
+    marginHorizontal: 20,
     gap: 10,
   },
   countryInputContainer: {
@@ -521,6 +578,8 @@ const styles = StyleSheet.create({
     borderColor: colors.secondaryThirtyPercent,
     borderWidth: 1,
     justifyContent: 'center',
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   phoneInput: {
     padding: 0,
