@@ -1,30 +1,22 @@
-import { authAPI, SignupRequest } from '@/apiServices/endpoints/authentication';
-import { AppText } from '@/components/ui';
-import { colors, fonts } from '@/constants';
-import { RootState } from '@/redux/store';
-import { signupFailure, signupStart, signupSuccess } from '@/redux/user/reducer';
-import { MaterialIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import {
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StatusBar,
-    StyleSheet,
-    TextInput,
-    TouchableOpacity,
-    useWindowDimensions,
-    View,
-} from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
+import { Alert, ScrollView, StyleSheet, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-export default function SignUpScreen() {
+import { AppText } from '../../components/ui';
+import { colors } from '../../constants/Colors';
+import { fonts } from '../../constants/Fonts';
+import { useAuth } from '../../hooks/useAuth';
+
+export default function SignUp() {
+  const { t } = useTranslation('auth');
+  const { login, isLoading } = useAuth();
   const router = useRouter();
-  const dispatch = useDispatch();
-  const { width, height } = useWindowDimensions();
-  const { isLoading, error } = useSelector((state: RootState) => state.userReducer);
+  const { width } = useWindowDimensions();
+  const insets = useSafeAreaInsets();
 
   const [formData, setFormData] = useState({
     firstName: '',
@@ -33,33 +25,38 @@ export default function SignUpScreen() {
     phone: '',
     password: '',
   });
-  const [formErrors, setFormErrors] = useState<{[key: string]: string}>({});
+  const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [hidePassword, setHidePassword] = useState(true);
+  const [isEmailValid, setIsEmailValid] = useState(false);
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const isValid = emailRegex.test(email.trim());
+    setIsEmailValid(isValid);
+    return isValid;
+  };
 
   const validateForm = () => {
-    const errors: {[key: string]: string} = {};
-    
+    const errors: { [key: string]: string } = {};
+
     if (!formData.firstName.trim()) {
-      errors.firstName = 'First name cannot be empty';
+      errors.firstName = t('validation.firstNameRequired');
     }
-    
+
     if (!formData.lastName.trim()) {
-      errors.lastName = 'Last name cannot be empty';
+      errors.lastName = t('validation.lastNameRequired');
     }
-    
+
     if (!formData.email.trim()) {
-      errors.email = 'Email Address is Required';
-    } else {
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailPattern.test(formData.email)) {
-        errors.email = 'Please enter valid email';
-      }
+      errors.email = t('validation.emailRequired');
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = t('validation.emailInvalid');
     }
-    
+
     if (!formData.password) {
-      errors.password = 'Password cannot be empty!';
+      errors.password = t('validation.passwordRequired');
     }
-    
+
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
@@ -68,28 +65,11 @@ export default function SignUpScreen() {
     if (!validateForm()) return;
 
     try {
-      dispatch(signupStart());
-
-      const signupData: SignupRequest = {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        password: formData.password,
-        phone: formData.phone,
-      };
-
-      const response = await authAPI.signup(signupData);
-      
-      dispatch(signupSuccess({
-        userData: response.data.user,
-        token: response.data.token,
-        refreshToken: response.data.refreshToken,
-      }));
-
+      // Mock signup - replace with actual API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       router.replace('/(tabs)');
-      
-    } catch (error: any) {
-      dispatch(signupFailure(error.message || 'Sign up failed'));
+    } catch (error) {
+      Alert.alert('Error', 'Sign up failed');
     }
   };
 
@@ -97,167 +77,167 @@ export default function SignUpScreen() {
     setHidePassword(!hidePassword);
   };
 
-  const handleSignIn = () => {
-    router.push('/auth/login');
-  };
-
   return (
-    <SafeAreaView style={[styles.container, { backgroundColor: colors.light }]}>
-      <StatusBar backgroundColor="transparent" barStyle="dark-content" />
-      <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+    <View style={styles.container}>
+      <StatusBar style="dark" backgroundColor={colors.primary} />
+      
+      {/* NAVIGATION HEADER */}
+      <View style={[styles.navHeader, { paddingTop: insets.top + 15 }]}>
+        <TouchableOpacity style={styles.backButton} onPress={() => router.back()}>
+          <Ionicons name="chevron-back" size={24} color={colors.primary} />
+        </TouchableOpacity>
+        <AppText style={styles.navTitle}>{t('signup.navTitle')}</AppText>
+        <View style={styles.navSpacer} />
+      </View>
+
+      <ScrollView
+        contentContainerStyle={styles.scrollContainer}
+        showsVerticalScrollIndicator={false}
       >
-        <ScrollView
-          contentContainerStyle={{ flexGrow: 1 }}
-          keyboardDismissMode="interactive"
-          showsVerticalScrollIndicator={false}
-        >
-          <View style={[styles.content, { width: width * 0.9 }]}>
-            {/* TITLE */}
-            <AppText style={styles.mainTitle}>
-              Experience the game like never before
-            </AppText>
+        <View style={styles.content}>
+          {/* TITLE */}
+          <AppText style={styles.mainTitle}>
+            {t('signup.title')}
+          </AppText>
 
-            {/* SUBTITLE */}
-            <AppText style={styles.subtitle}>
-              Welcome to the qick community
-            </AppText>
+          {/* SUBTITLE */}
+          <AppText style={styles.subtitle}>
+            {t('signup.subtitle')}
+          </AppText>
 
-            {/* FIRST NAME INPUT */}
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={[styles.textInput, formErrors.firstName && styles.inputError]}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, firstName: text }))}
-                value={formData.firstName}
-                placeholder="First Name"
-                placeholderTextColor={colors.secondary}
-              />
-            </View>
-            {formErrors.firstName && (
-              <AppText style={styles.errorText}>{formErrors.firstName}</AppText>
-            )}
-
-            {/* LAST NAME INPUT */}
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={[styles.textInput, formErrors.lastName && styles.inputError]}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, lastName: text }))}
-                value={formData.lastName}
-                placeholder="Last Name"
-                placeholderTextColor={colors.secondary}
-              />
-            </View>
-            {formErrors.lastName && (
-              <AppText style={styles.errorText}>{formErrors.lastName}</AppText>
-            )}
-
-            {/* EMAIL INPUT */}
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={[styles.textInput, formErrors.email && styles.inputError]}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, email: text.trim().toLowerCase() }))}
-                value={formData.email}
-                placeholder="Email Address"
-                placeholderTextColor={colors.secondary}
-                keyboardType="email-address"
-                autoCapitalize="none"
-              />
-            </View>
-            {formErrors.email && (
-              <AppText style={styles.errorText}>{formErrors.email}</AppText>
-            )}
-
-            {/* PHONE INPUT */}
-            <View style={styles.inputContainer}>
-              <TextInput
-                style={[styles.textInput, formErrors.phone && styles.inputError]}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, phone: text }))}
-                value={formData.phone}
-                placeholder="Phone Number"
-                placeholderTextColor={colors.secondary}
-                keyboardType="phone-pad"
-              />
-            </View>
-            {formErrors.phone && (
-              <AppText style={styles.errorText}>{formErrors.phone}</AppText>
-            )}
-
-            {/* PASSWORD INPUT */}
-            <View style={styles.passwordContainer}>
-              <TextInput
-                style={styles.passwordInput}
-                value={formData.password}
-                onChangeText={(text) => setFormData(prev => ({ ...prev, password: text.trim() }))}
-                secureTextEntry={hidePassword}
-                placeholder="Password"
-                placeholderTextColor={colors.secondary}
-              />
-              <TouchableOpacity
-                onPress={toggleHidePassword}
-                style={styles.passwordToggle}
-              >
-                <MaterialIcons
-                  name={hidePassword ? "visibility-off" : "visibility"}
-                  size={24}
-                  color={colors.secondary}
-                />
-              </TouchableOpacity>
-            </View>
-            {formErrors.password && (
-              <AppText style={styles.errorText}>{formErrors.password}</AppText>
-            )}
-
-            {/* SIGN UP BUTTON */}
-            <View style={styles.buttonContainer}>
-              <TouchableOpacity
-                style={styles.signUpButton}
-                onPress={handleSignUp}
-                disabled={isLoading}
-              >
-                <AppText style={styles.signUpButtonText}>
-                  {isLoading ? 'Signing Up...' : 'Sign Up'}
-                </AppText>
-              </TouchableOpacity>
-            </View>
-
-            {/* TERMS OF SERVICE */}
-            <View style={styles.termsContainer}>
-              <AppText style={styles.termsText}>
-                By signing up, you confirm that you have read and accept
-              </AppText>
-              <View style={styles.termsRow}>
-                <AppText style={styles.termsText}> qick's </AppText>
-                <TouchableOpacity>
-                  <AppText style={{
-                    fontSize: 12,
-                    color: colors.secondary,
-                    fontFamily: fonts.regular,
-                    textDecorationLine: 'underline',
-                  }}>
-                    Terms of Service and Privacy Policy.
-                  </AppText>
-                </TouchableOpacity>
-              </View>
-            </View>
-
-            <View style={{ flex: 1, marginVertical: 20 }} />
-
-            {/* FOOTER */}
-            <View style={[styles.footer, { width }]}>
-              <AppText style={styles.footerText}>
-                Already have an account?
-              </AppText>
-              <TouchableOpacity onPress={handleSignIn}>
-                <AppText style={styles.footerLink}>
-                  Sign In
-                </AppText>
-              </TouchableOpacity>
-            </View>
+          {/* FIRST NAME INPUT */}
+          <View style={[styles.inputContainer, formErrors.firstName ? styles.inputError : null]}>
+            <TextInput
+              style={styles.textInput}
+              placeholder={t('signup.firstNamePlaceholder')}
+              placeholderTextColor={colors.secondary}
+              value={formData.firstName}
+              onChangeText={(text) => {
+                setFormData({ ...formData, firstName: text });
+                if (formErrors.firstName) {
+                  setFormErrors({ ...formErrors, firstName: '' });
+                }
+              }}
+            />
           </View>
-        </ScrollView>
-      </KeyboardAvoidingView>
-    </SafeAreaView>
+
+          {/* LAST NAME INPUT */}
+          <View style={[styles.inputContainer, formErrors.lastName ? styles.inputError : null]}>
+            <TextInput
+              style={styles.textInput}
+              placeholder={t('signup.lastNamePlaceholder')}
+              placeholderTextColor={colors.secondary}
+              value={formData.lastName}
+              onChangeText={(text) => {
+                setFormData({ ...formData, lastName: text });
+                if (formErrors.lastName) {
+                  setFormErrors({ ...formErrors, lastName: '' });
+                }
+              }}
+            />
+          </View>
+
+          {/* EMAIL INPUT */}
+          <View style={[styles.inputContainer, formErrors.email ? styles.inputError : null]}>
+            <TextInput
+              style={styles.textInput}
+              placeholder={t('signup.emailPlaceholder')}
+              placeholderTextColor={colors.secondary}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              value={formData.email}
+              onChangeText={(text) => {
+                setFormData({ ...formData, email: text });
+                validateEmail(text);
+                if (formErrors.email) {
+                  setFormErrors({ ...formErrors, email: '' });
+                }
+              }}
+            />
+            {isEmailValid && (
+              <View style={styles.emailCheckContainer}>
+                <MaterialIcons
+                  name="check-circle"
+                  size={24}
+                  color={colors.clock}
+                />
+              </View>
+            )}
+          </View>
+
+          {/* PHONE INPUT */}
+          <View style={styles.inputContainer}>
+            <TextInput
+              style={styles.textInput}
+              placeholder={t('signup.phonePlaceholder')}
+              placeholderTextColor={colors.secondary}
+              keyboardType="phone-pad"
+              value={formData.phone}
+              onChangeText={(text) => {
+                setFormData({ ...formData, phone: text });
+              }}
+            />
+          </View>
+
+          {/* PASSWORD INPUT */}
+          <View style={[styles.inputContainer, formErrors.password ? styles.inputError : null]}>
+            <TextInput
+              style={styles.passwordInput}
+              placeholder={t('signup.passwordPlaceholder')}
+              placeholderTextColor={colors.secondary}
+              secureTextEntry={hidePassword}
+              value={formData.password}
+              onChangeText={(text) => {
+                setFormData({ ...formData, password: text });
+                if (formErrors.password) {
+                  setFormErrors({ ...formErrors, password: '' });
+                }
+              }}
+            />
+            <TouchableOpacity
+              style={styles.passwordToggle}
+              onPress={toggleHidePassword}
+            >
+              <Ionicons
+                name={hidePassword ? 'eye-off-outline' : 'eye-outline'}
+                size={24}
+                color={colors.secondary}
+              />
+            </TouchableOpacity>
+          </View>
+          {/* TERMS */}
+          <View style={styles.termsContainer}>
+            <AppText style={styles.termsText}>
+              {t('signup.termsPrefix')}
+              <AppText style={styles.termsLink}> {t('signup.termsLink')}</AppText>
+            </AppText>
+          </View>
+
+          {/* SIGN UP BUTTON */}
+          <TouchableOpacity
+            style={styles.signUpButton}
+            onPress={handleSignUp}
+            disabled={isLoading}
+          >
+            <AppText style={styles.signUpButtonText}>
+              {isLoading ? t('signup.signingUpButton') : t('signup.signUpButton')}
+            </AppText>
+          </TouchableOpacity>
+        </View>
+      </ScrollView>
+
+      {/* FOOTER */}
+      <View style={[styles.footer, { width }]}>
+        <AppText style={styles.footerText}>
+          {t('signup.footerText')}
+        </AppText>
+        <TouchableOpacity onPress={() => router.push('/auth/login')}>
+          <AppText style={styles.footerLink}>
+            {t('signup.footerLink')}
+          </AppText>
+        </TouchableOpacity>
+      </View>
+    </View>
   );
 }
 
@@ -265,129 +245,138 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
+  navHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    paddingHorizontal: 20,
+    paddingBottom: 15,
+    backgroundColor: colors.white,
+  },
+  backButton: {
+    padding: 5,
+  },
+  navTitle: {
+    fontSize: 18,
+    fontFamily: fonts.semibold,
+    color: colors.primary,
+    textAlign: 'center',
+    flex: 1,
+  },
+  navSpacer: {
+    width: 34, // Same width as back button to center the title
+  },
+  scrollContainer: {
+    paddingBottom: 0,
+  },
   content: {
     flex: 1,
-    alignSelf: 'center',
-    paddingHorizontal: 20,
   },
   mainTitle: {
+    fontSize: 52,
     fontFamily: fonts.bold,
-    fontSize: 32,
     color: colors.primary,
+    marginLeft: 20,
     marginTop: 40,
-    marginBottom: 10,
+    lineHeight: 60,
   },
   subtitle: {
-    color: colors.secondary,
-    fontFamily: fonts.regular,
     fontSize: 16,
+    fontFamily: fonts.regular,
+    color: colors.secondary,
+    marginLeft: 20,
+    marginRight: 20,
+    marginTop: 20,
     marginBottom: 20,
   },
   inputContainer: {
+    height: 67,
+    width: '90%',
+    marginTop: 15,
+    borderRadius: 16,
+    paddingHorizontal: 20,
+    backgroundColor: colors.white,
+    borderColor: colors.secondaryThirtyPercent,
+    borderWidth: 1,
+    marginLeft: 20,
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
   },
   textInput: {
-    borderWidth: 1,
-    borderColor: colors.secondaryThirtyPercent,
-    height: 67,
-    width: '100%',
-    marginTop: 20,
-    borderRadius: 16,
-    paddingHorizontal: 20,
-    alignSelf: 'center',
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    color: colors.secondary,
+    flex: 1,
+    fontSize: 16,
+    fontFamily: fonts.regular,
+    color: colors.primary,
+  },
+  passwordInput: {
+    flex: 1,
+    fontSize: 16,
+    fontFamily: fonts.regular,
+    color: colors.primary,
+  },
+  passwordToggle: {
+    padding: 5,
+  },
+  emailCheckContainer: {
+    padding: 5,
   },
   inputError: {
     borderColor: colors.red,
   },
-  passwordContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.secondaryThirtyPercent,
-    height: 67,
-    width: '100%',
-    marginTop: 20,
-    borderRadius: 16,
-    alignSelf: 'center',
-  },
-  passwordInput: {
-    flex: 1,
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    color: colors.secondary,
-    height: '100%',
-    paddingHorizontal: 20,
-  },
-  passwordToggle: {
-    width: 40,
-    height: 40,
-    marginEnd: 10,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  errorText: {
-    fontSize: 10,
-    color: colors.red,
-    marginLeft: 45,
-    marginTop: 5,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    alignSelf: 'center',
-    marginTop: 20,
-    width: '100%',
-    justifyContent: 'space-between',
-  },
   signUpButton: {
-    flex: 1,
-    height: 60,
-    borderRadius: 30,
     backgroundColor: colors.lime,
-    justifyContent: 'center',
+    height: 67,
+    width: '90%',
+    borderRadius: 16,
     alignItems: 'center',
+    justifyContent: 'center',
+    marginTop: 60,
+    marginLeft: 20,
+    marginBottom: 40,
   },
   signUpButtonText: {
-    color: colors.primary,
-    fontFamily: fonts.medium,
     fontSize: 16,
+    fontFamily: fonts.semibold,
+    color: colors.primary,
   },
   termsContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignSelf: 'center',
-    width: '100%',
-    marginTop: 20,
+    marginTop: 28,
+    marginLeft: 20,
+    marginRight: 20,
   },
   termsText: {
-    fontSize: 12,
+    fontSize: 14,
     color: colors.secondary,
     fontFamily: fonts.regular,
+    textAlign: 'center',
   },
-  termsRow: {
-    flexDirection: 'row',
+  termsLink: {
+    fontSize: 14,
+    color: colors.secondary,
+    fontFamily: fonts.regular,
+    textDecorationLine: 'underline',
   },
   footer: {
-    height: 80,
+    height: 100,
     backgroundColor: colors.secondaryTenPercent,
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
-    gap: 5,
+    justifyContent: 'center',
+    position: 'fixed',
+    paddingBottom: 20,
+    gap: 10,
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   footerText: {
-    color: colors.primary,
-    fontFamily: fonts.regular,
     fontSize: 16,
+    fontFamily: fonts.regular,
+    color: colors.footer,
   },
   footerLink: {
-    fontFamily: fonts.bold,
     fontSize: 16,
+    fontFamily: fonts.semibold,
     color: colors.footer,
   },
 }); 

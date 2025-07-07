@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
-    position: 'absolute',
+    position: 'fixed',
     paddingBottom: 20,
     gap: 10,
     bottom: 0,
