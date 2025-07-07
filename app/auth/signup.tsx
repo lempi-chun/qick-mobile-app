@@ -7,7 +7,7 @@ import { Alert, ScrollView, StyleSheet, TextInput, TouchableOpacity, useWindowDi
 import CountryPicker, { Country, CountryCode } from 'react-native-country-picker-modal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
-import { AppText } from '../../components/ui';
+import { AppText, GooglePlacesInput } from '../../components/ui';
 import { colors } from '../../constants/Colors';
 import { fonts } from '../../constants/Fonts';
 import { useAuth } from '../../hooks/useAuth';
@@ -25,6 +25,7 @@ export default function SignUp() {
     email: '',
     phone: '',
     password: '',
+    location: '',
   });
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [hidePassword, setHidePassword] = useState(true);
@@ -70,6 +71,11 @@ export default function SignUp() {
       errors.phone = t('validation.phoneRequired');
     }
     
+    // Location validation
+    if (!formData.location.trim()) {
+      errors.location = t('validation.locationRequired');
+    }
+    
     // Password validation
     if (!formData.password.trim()) {
       errors.password = t('validation.passwordRequired');
@@ -92,6 +98,7 @@ export default function SignUp() {
         email: formData.email,
         phone: fullPhoneNumber,
         password: formData.password,
+        location: formData.location,
       };
 
       console.log('Signup data:', signupData);
@@ -245,6 +252,30 @@ export default function SignUp() {
             </View>
           </View>
 
+          {/* LOCATION INPUT */}
+          <GooglePlacesInput
+            placeholder={t('signup.locationPlaceholder') || 'Location (City)'}
+            value={formData.location}
+            error={!!formErrors.location}
+            onPlaceSelected={(place) => {
+              setFormData({ ...formData, location: place.description });
+              if (formErrors.location) {
+                setFormErrors({ ...formErrors, location: '' });
+              }
+            }}
+            onChangeText={(text) => {
+              setFormData({ ...formData, location: text });
+              if (formErrors.location) {
+                setFormErrors({ ...formErrors, location: '' });
+              }
+            }}
+          />
+          {formErrors.location && (
+            <AppText style={styles.errorText}>
+              {formErrors.location}
+            </AppText>
+          )}
+
           {/* PASSWORD INPUT */}
           <View style={[styles.inputContainer, formErrors.password ? styles.inputError : null]}>
             <TextInput
@@ -388,6 +419,13 @@ const styles = StyleSheet.create({
   },
   inputError: {
     borderColor: colors.red,
+  },
+  errorText: {
+    fontSize: 12,
+    color: colors.red,
+    fontFamily: fonts.regular,
+    marginLeft: 20,
+    marginTop: 5,
   },
   signUpButton: {
     backgroundColor: colors.lime,
