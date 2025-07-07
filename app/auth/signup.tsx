@@ -4,6 +4,7 @@ import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Alert, ScrollView, StyleSheet, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
+import CountryPicker, { Country, CountryCode } from 'react-native-country-picker-modal';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { AppText } from '../../components/ui';
@@ -28,6 +29,14 @@ export default function SignUp() {
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [hidePassword, setHidePassword] = useState(true);
   const [isEmailValid, setIsEmailValid] = useState(false);
+  const [countryCode, setCountryCode] = useState<CountryCode>('US');
+  const [country, setCountry] = useState<Country>({
+    cca2: 'US',
+    callingCode: ['1'],
+    name: 'United States',
+    flag: 'flag-us',
+  } as Country);
+  const [showCountryPicker, setShowCountryPicker] = useState(false);
 
   const validateEmail = (email: string) => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -38,43 +47,70 @@ export default function SignUp() {
 
   const validateForm = () => {
     const errors: { [key: string]: string } = {};
-
+    
+    // First name validation
     if (!formData.firstName.trim()) {
       errors.firstName = t('validation.firstNameRequired');
     }
-
+    
+    // Last name validation
     if (!formData.lastName.trim()) {
       errors.lastName = t('validation.lastNameRequired');
     }
-
+    
+    // Email validation
     if (!formData.email.trim()) {
       errors.email = t('validation.emailRequired');
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+    } else if (!isEmailValid) {
       errors.email = t('validation.emailInvalid');
     }
-
-    if (!formData.password) {
+    
+    // Phone validation
+    if (!formData.phone.trim()) {
+      errors.phone = t('validation.phoneRequired');
+    }
+    
+    // Password validation
+    if (!formData.password.trim()) {
       errors.password = t('validation.passwordRequired');
     }
-
+    
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   const handleSignUp = async () => {
     if (!validateForm()) return;
-
+    
     try {
-      // Mock signup - replace with actual API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      router.replace('/(tabs)');
+      // Format phone number with country code
+      const fullPhoneNumber = `+${country.callingCode[0]}${formData.phone}`;
+      
+      const signupData = {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        phone: fullPhoneNumber,
+        password: formData.password,
+      };
+
+      console.log('Signup data:', signupData);
+      Alert.alert('Success', 'Account created successfully!');
+      router.push('/auth/login');
     } catch (error) {
-      Alert.alert('Error', 'Sign up failed');
+      console.error('Sign up error:', error);
+      Alert.alert('Error', 'Failed to create account. Please try again.');
     }
   };
 
   const toggleHidePassword = () => {
     setHidePassword(!hidePassword);
+  };
+
+  const onSelectCountry = (selectedCountry: Country) => {
+    setCountryCode(selectedCountry.cca2);
+    setCountry(selectedCountry);
+    setShowCountryPicker(false);
   };
 
   return (
@@ -166,17 +202,47 @@ export default function SignUp() {
           </View>
 
           {/* PHONE INPUT */}
-          <View style={styles.inputContainer}>
-            <TextInput
-              style={styles.textInput}
-              placeholder={t('signup.phonePlaceholder')}
-              placeholderTextColor={colors.secondary}
-              keyboardType="phone-pad"
-              value={formData.phone}
-              onChangeText={(text) => {
-                setFormData({ ...formData, phone: text });
-              }}
-            />
+          <View style={styles.phoneRowContainer}>
+            {/* Country Code Selector */}
+            <TouchableOpacity 
+              style={[styles.countryInputContainer, formErrors.phone ? styles.inputError : null]}
+              onPress={() => setShowCountryPicker(true)}
+            >
+              <View style={styles.flagContainer}>
+                <CountryPicker
+                  countryCode={countryCode}
+                  visible={false}
+                  onSelect={onSelectCountry}
+                  withFilter={false}
+                  withFlag={true}
+                  withEmoji={false}
+                  withCountryNameButton={false}
+                  withAlphaFilter={false}
+                  withCallingCode={false}
+                />
+                <AppText style={styles.countryCode}>
+                  +{country.callingCode[0]}
+                </AppText>
+              </View>
+              <Ionicons name="chevron-down" size={16} color={colors.secondary} />
+            </TouchableOpacity>
+            
+            {/* Phone Number Input */}
+            <View style={[styles.phoneNumberInputContainer, formErrors.phone ? styles.inputError : null]}>
+              <TextInput
+                style={[styles.textInput, styles.phoneInput]}
+                placeholder={t('signup.phonePlaceholder')}
+                placeholderTextColor={colors.secondary}
+                keyboardType="phone-pad"
+                value={formData.phone}
+                onChangeText={(text) => {
+                  setFormData({ ...formData, phone: text });
+                  if (formErrors.phone) {
+                    setFormErrors({ ...formErrors, phone: '' });
+                  }
+                }}
+              />
+            </View>
           </View>
 
           {/* PASSWORD INPUT */}
@@ -378,5 +444,51 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontFamily: fonts.semibold,
     color: colors.footer,
+  },
+  phoneRowContainer: {
+    flexDirection: 'row',
+    width: '90%',
+    marginTop: 15,
+    marginLeft: 20,
+    gap: 10,
+  },
+  countryInputContainer: {
+    height: 67,
+    width: 120,
+    borderRadius: 16,
+    paddingHorizontal: 15,
+    backgroundColor: colors.white,
+    borderColor: colors.secondaryThirtyPercent,
+    borderWidth: 1,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  flagContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  countryCode: {
+    fontSize: 16,
+    fontFamily: fonts.regular,
+    color: colors.primary,
+  },
+  phoneNumberInputContainer: {
+    flex: 1,
+    height: 67,
+    borderRadius: 16,
+    paddingHorizontal: 20,
+    backgroundColor: colors.white,
+    borderColor: colors.secondaryThirtyPercent,
+    borderWidth: 1,
+    justifyContent: 'center',
+  },
+  phoneInput: {
+    padding: 0,
+    margin: 0,
+    fontSize: 16,
+    fontFamily: fonts.regular,
+    color: colors.primary,
   },
 }); 
