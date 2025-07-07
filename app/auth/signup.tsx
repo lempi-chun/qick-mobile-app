@@ -259,8 +259,9 @@ export default function SignUp() {
             <TouchableOpacity 
               style={[styles.countryInputContainer, formErrors.phone ? styles.inputError : null]}
               onPress={() => setShowCountryPicker(true)}
+              activeOpacity={0.7}
             >
-              <View style={styles.flagContainer}>
+              <View style={styles.flagContainer} pointerEvents="none">
                 <CountryPicker
                   countryCode={countryCode}
                   visible={false}
@@ -306,6 +307,22 @@ export default function SignUp() {
               )}
             </View>
           </View>
+
+          {/* Hidden CountryPicker for modal functionality */}
+          {showCountryPicker && (
+            <CountryPicker
+              countryCode={countryCode}
+              visible={showCountryPicker}
+              onSelect={onSelectCountry}
+              onClose={() => setShowCountryPicker(false)}
+              withFilter={true}
+              withFlag={true}
+              withEmoji={false}
+              withCountryNameButton={false}
+              withAlphaFilter={false}
+              withCallingCode={false}
+            />
+          )}
 
           {/* LOCATION INPUT */}
           <GooglePlacesInput
@@ -549,7 +566,7 @@ const styles = StyleSheet.create({
   },
   countryInputContainer: {
     height: 67,
-    width: 120,
+    width: 140,
     borderRadius: 16,
     paddingHorizontal: 15,
     backgroundColor: colors.white,
