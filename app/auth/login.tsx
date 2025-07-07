@@ -1,4 +1,4 @@
-import { MaterialIcons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
@@ -132,8 +132,8 @@ export default function Login() {
               style={styles.passwordToggle}
               onPress={toggleHidePassword}
             >
-              <MaterialIcons
-                name={hidePassword ? 'visibility' : 'visibility-off'}
+              <Ionicons
+                name={hidePassword ? 'eye-off-outline' : 'eye-outline'}
                 size={24}
                 color={colors.secondary}
               />
@@ -161,7 +161,7 @@ export default function Login() {
           {/* TERMS */}
           <View style={styles.termsContainer}>
             <AppText style={styles.termsText}>
-              {t('login.termsPrefix')} <AppText style={styles.termsLink}>{t('login.termsCompany')}</AppText>
+              {t('login.termsPrefix')} 
               <AppText style={styles.termsLink}> {t('login.termsLink')}</AppText>
             </AppText>
           </View>
@@ -203,7 +203,7 @@ const styles = StyleSheet.create({
     lineHeight: 55,
   },
   subtitle: {
-    fontSize: 14,
+    fontSize: 16,
     fontFamily: fonts.regular,
     color: colors.secondary,
     marginLeft: 20,
@@ -216,8 +216,8 @@ const styles = StyleSheet.create({
     marginTop: 30,
     borderRadius: 16,
     paddingHorizontal: 20,
-    backgroundColor: colors.secondaryTenPercent,
-    borderColor: colors.secondaryTenPercent,
+    backgroundColor: colors.white,
+    borderColor: colors.secondaryThirtyPercent,
     borderWidth: 1,
     marginLeft: 20,
     flexDirection: 'row',
@@ -272,13 +272,13 @@ const styles = StyleSheet.create({
     marginRight: 20,
   },
   termsText: {
-    fontSize: 12,
+    fontSize: 14,
     color: colors.secondary,
     fontFamily: fonts.regular,
     textAlign: 'center',
   },
   termsLink: {
-    fontSize: 12,
+    fontSize: 14,
     color: colors.secondary,
     fontFamily: fonts.regular,
     textDecorationLine: 'underline',
