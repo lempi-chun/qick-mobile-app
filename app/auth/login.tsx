@@ -1,27 +1,20 @@
-import { authAPI, LoginRequest } from '@/apiServices/endpoints/authentication';
-import { AppText } from '@/components/ui';
-import { colors, fonts } from '@/constants';
-import { RootState } from '@/redux/store';
-import { loginFailure, loginStart, loginSuccess } from '@/redux/user/reducer';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useRouter } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
 import { useState } from 'react';
-import {
-  ScrollView,
-  StatusBar,
-  StyleSheet,
-  TextInput,
-  TouchableOpacity,
-  useWindowDimensions,
-  View
-} from 'react-native';
-import { useDispatch, useSelector } from 'react-redux';
+import { useTranslation } from 'react-i18next';
+import { Alert, ScrollView, StyleSheet, TextInput, TouchableOpacity, useWindowDimensions, View } from 'react-native';
 
-export default function LoginScreen() {
+import { AppText } from '../../components/ui';
+import { colors } from '../../constants/Colors';
+import { fonts } from '../../constants/Fonts';
+import { useAuth } from '../../hooks/useAuth';
+
+export default function Login() {
+  const { t } = useTranslation('auth');
+  const { login, isLoading } = useAuth();
   const router = useRouter();
-  const dispatch = useDispatch();
   const { width } = useWindowDimensions();
-  const { isLoading, error } = useSelector((state: RootState) => state.userReducer);
 
   const [formData, setFormData] = useState({
     email: '',
@@ -34,46 +27,32 @@ export default function LoginScreen() {
     const errors: { [key: string]: string } = {};
 
     if (!formData.email.trim()) {
-      errors.email = 'Email Address is Required';
-    } else {
-      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailPattern.test(formData.email)) {
-        errors.email = 'Please enter valid email';
-      }
+      errors.email = t('validation.emailRequired');
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      errors.email = t('validation.emailInvalid');
     }
 
     if (!formData.password) {
-      errors.password = 'Password cannot be empty!';
+      errors.password = t('validation.passwordRequired');
     }
 
     setFormErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
-  const handleLogin = async () => {
+  const handleSignIn = async () => {
     if (!validateForm()) return;
 
     try {
-      dispatch(loginStart());
-
-      const loginData: LoginRequest = {
-        email: formData.email,
-        password: formData.password,
-      };
-
-      const response = await authAPI.login(loginData);
-
-      dispatch(loginSuccess({
-        userData: response.data.user,
-        token: response.data.token,
-        refreshToken: response.data.refreshToken,
-      }));
-
+      await login(formData.email, formData.password);
       router.replace('/(tabs)');
-
-    } catch (error: any) {
-      dispatch(loginFailure(error.message || 'Login failed'));
+    } catch (error) {
+      Alert.alert('Error', 'Invalid email or password');
     }
+  };
+
+  const handleForgotPassword = () => {
+    router.push('/auth/forgot-password');
   };
 
   const toggleHidePassword = () => {
@@ -81,118 +60,107 @@ export default function LoginScreen() {
   };
 
   return (
-    <View style={[styles.container, { backgroundColor: colors.light }]}>
-      <StatusBar backgroundColor={colors.light} barStyle="dark-content" />
+    <View style={styles.container}>
+      <StatusBar style="dark" backgroundColor={colors.primary} />
       <ScrollView
-        contentContainerStyle={{ flexGrow: 1 }}
-        keyboardDismissMode="interactive"
+        contentContainerStyle={styles.scrollContainer}
         showsVerticalScrollIndicator={false}
       >
-        {/* TITLE */}
-        <AppText style={styles.mainTitle}>
-          Book, play, score.
-        </AppText>
+        <View style={styles.content}>
+          {/* TITLE */}
+          <AppText style={styles.mainTitle}>
+            {t('login.title')}
+          </AppText>
 
-        {/* SUBTITLE */}
-        <AppText style={styles.subtitle}>
-          Book a field, invite your friends and split the bill in seconds.
-        </AppText>
+          {/* SUBTITLE */}
+          <AppText style={styles.subtitle}>
+            {t('login.subtitle')}
+          </AppText>
 
-        {/* EMAIL INPUT */}
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={[styles.textInput, formErrors.email && styles.inputError]}
-            onChangeText={(text) => setFormData(prev => ({ ...prev, email: text.trim().toLowerCase() }))}
-            value={formData.email}
-            keyboardType="email-address"
-            returnKeyType="next"
-            placeholder="Email Address"
-            placeholderTextColor={colors.secondary}
-          />
-        </View>
-        {formErrors.email && (
-          <AppText style={styles.errorText}>{formErrors.email}</AppText>
-        )}
-
-        {/* PASSWORD INPUT */}
-        <View style={styles.passwordContainer}>
-          <TextInput
-            style={styles.passwordInput}
-            value={formData.password}
-            onChangeText={(text) => setFormData(prev => ({ ...prev, password: text.trim() }))}
-            secureTextEntry={hidePassword}
-            placeholder="Password"
-            placeholderTextColor={colors.secondary}
-          />
-          <TouchableOpacity
-            onPress={toggleHidePassword}
-            style={styles.passwordToggle}
-          >
-            <MaterialIcons
-              name={hidePassword ? "visibility-off" : "visibility"}
-              size={24}
-              color={colors.secondary}
+          {/* EMAIL INPUT */}
+          <View style={[styles.inputContainer, formErrors.email ? styles.inputError : null]}>
+            <TextInput
+              style={styles.textInput}
+              placeholder={t('login.emailPlaceholder')}
+              placeholderTextColor={colors.secondary}
+              keyboardType="email-address"
+              autoCapitalize="none"
+              value={formData.email}
+              onChangeText={(text) => {
+                setFormData({...formData, email: text});
+                if (formErrors.email) {
+                  setFormErrors({...formErrors, email: ''});
+                }
+              }}
             />
-          </TouchableOpacity>
-        </View>
-        {formErrors.password && (
-          <AppText style={styles.errorText}>{formErrors.password}</AppText>
-        )}
+          </View>
 
-        {/* SIGN IN BUTTON */}
-        <View style={styles.buttonContainer}>
+          {/* PASSWORD INPUT */}
+          <View style={[styles.inputContainer, formErrors.password ? styles.inputError : null]}>
+            <TextInput
+              style={styles.passwordInput}
+              placeholder={t('login.passwordPlaceholder')}
+              placeholderTextColor={colors.secondary}
+              secureTextEntry={hidePassword}
+              value={formData.password}
+              onChangeText={(text) => {
+                setFormData({...formData, password: text});
+                if (formErrors.password) {
+                  setFormErrors({...formErrors, password: ''});
+                }
+              }}
+            />
+            <TouchableOpacity
+              style={styles.passwordToggle}
+              onPress={toggleHidePassword}
+            >
+              <MaterialIcons
+                name={hidePassword ? 'visibility' : 'visibility-off'}
+                size={24}
+                color={colors.secondary}
+              />
+            </TouchableOpacity>
+          </View>
+
+          {/* SIGN IN BUTTON */}
           <TouchableOpacity
             style={styles.signInButton}
-            onPress={handleLogin}
+            onPress={handleSignIn}
             disabled={isLoading}
           >
             <AppText style={styles.signInButtonText}>
-              {isLoading ? 'Signing In...' : 'Sign In'}
+              {isLoading ? t('login.signingInButton') : t('login.signInButton')}
             </AppText>
           </TouchableOpacity>
-        </View>
 
-        {/* FORGOT PASSWORD */}
-        <TouchableOpacity>
-          <AppText style={styles.forgotPassword}>
-            Forgot your password?
-          </AppText>
-        </TouchableOpacity>
+          {/* FORGOT PASSWORD */}
+          <TouchableOpacity onPress={handleForgotPassword}>
+            <AppText style={styles.forgotPassword}>
+              {t('login.forgotPassword')}
+            </AppText>
+          </TouchableOpacity>
 
-        {/* TERMS OF SERVICE */}
-        <View style={styles.termsContainer}>
-          <AppText style={styles.termsText}>
-            By logging in, you confirm that you have read and accept
-          </AppText>
-          <View style={styles.termsRow}>
-            <AppText style={styles.termsText}> qick's </AppText>
-            <TouchableOpacity>
-              <AppText style={{
-                fontSize: 12,
-                color: colors.secondary,
-                fontFamily: fonts.regular,
-                textDecorationLine: 'underline',
-              }}>
-                Terms of Service and Privacy Policy.
-              </AppText>
-            </TouchableOpacity>
+          {/* TERMS */}
+          <View style={styles.termsContainer}>
+            <AppText style={styles.termsText}>
+              {t('login.termsPrefix')} <AppText style={styles.termsLink}>{t('login.termsCompany')}</AppText>
+              <AppText style={styles.termsLink}> {t('login.termsLink')}</AppText>
+            </AppText>
           </View>
         </View>
-
-        <View style={{ flex: 1, marginVertical: 20 }} />
-
-        {/* FOOTER */}
-        <View style={[styles.footer, { width }]}>
-          <AppText style={styles.footerText}>
-            Don't have an account?
-          </AppText>
-          <TouchableOpacity onPress={() => router.push('/auth/signup')}>
-            <AppText style={styles.footerLink}>
-              Sign Up
-            </AppText>
-          </TouchableOpacity>
-        </View>
       </ScrollView>
+
+      {/* FOOTER */}
+      <View style={[styles.footer, { width }]}>
+        <AppText style={styles.footerText}>
+          {t('login.footerText')}
+        </AppText>
+        <TouchableOpacity onPress={() => router.push('/auth/signup')}>
+          <AppText style={styles.footerLink}>
+            {t('login.footerLink')}
+          </AppText>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 }
@@ -201,148 +169,120 @@ const styles = StyleSheet.create({
   container: {
     flex: 1,
   },
-  logoContainer: {
-    flexDirection: 'row',
-    justifyContent: 'flex-start',
-    alignItems: 'center',
-    marginTop: 60,
-    marginLeft: 20,
-    gap: 5,
+  scrollContainer: {
+    paddingBottom: 100,
   },
-  logoText: {
-    fontFamily: fonts.bold,
-    color: colors.clock,
-    fontSize: 23,
+
+  content: {
+    flex: 1,
   },
   mainTitle: {
+    fontSize: 52,
     fontFamily: fonts.bold,
-    fontSize: 48,
     color: colors.primary,
     marginLeft: 20,
-    marginTop: 100,
+    marginTop: 120,
     lineHeight: 55,
   },
   subtitle: {
-    color: colors.secondary,
     fontSize: 14,
     fontFamily: fonts.regular,
+    color: colors.secondary,
     marginLeft: 20,
     marginRight: 20,
     marginTop: 20,
-
   },
   inputContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  textInput: {
-    borderWidth: 1,
-    borderColor: colors.secondaryThirtyPercent,
     height: 67,
     width: '90%',
     marginTop: 30,
     borderRadius: 16,
     paddingHorizontal: 20,
-    alignSelf: 'center',
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    color: colors.secondary,
+    backgroundColor: colors.secondaryTenPercent,
+    borderColor: colors.secondaryTenPercent,
+    borderWidth: 1,
+    marginLeft: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  textInput: {
+    flex: 1,
+    fontSize: 16,
+    fontFamily: fonts.regular,
+    color: colors.primary,
+  },
+  passwordInput: {
+    flex: 1,
+    fontSize: 16,
+    fontFamily: fonts.regular,
+    color: colors.primary,
+  },
+  passwordToggle: {
+    padding: 5,
   },
   inputError: {
     borderColor: colors.red,
   },
-  passwordContainer: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    alignItems: 'center',
-    borderWidth: 1,
-    borderColor: colors.secondaryThirtyPercent,
+  signInButton: {
+    backgroundColor: colors.lime,
     height: 67,
     width: '90%',
-    marginTop: 15,
     borderRadius: 16,
-    alignSelf: 'center',
-  },
-  passwordInput: {
-    flex: 1,
-    fontFamily: fonts.medium,
-    fontSize: 14,
-    color: colors.secondary,
-    height: '100%',
-    paddingHorizontal: 20,
-  },
-  passwordToggle: {
-    width: 40,
-    height: 40,
-    marginEnd: 10,
     alignItems: 'center',
     justifyContent: 'center',
-  },
-  errorText: {
-    fontSize: 10,
-    color: colors.red,
-    marginLeft: 45,
-    marginTop: 5,
-  },
-  buttonContainer: {
-    flexDirection: 'row',
-    alignSelf: 'center',
-    marginTop: 20,
-    width: '90%',
-    justifyContent: 'space-between',
-  },
-  signInButton: {
-    flex: 1,
-    height: 60,
-    borderRadius: 30,
-    backgroundColor: colors.lime,
-    justifyContent: 'center',
-    alignItems: 'center',
+    marginTop: 30,
+    marginLeft: 20,
   },
   signInButtonText: {
-    color: colors.primary,
-    fontFamily: fonts.medium,
     fontSize: 16,
+    fontFamily: fonts.semibold,
+    color: colors.primary,
   },
   forgotPassword: {
-    marginTop: 20,
-    alignSelf: 'center',
-    fontFamily: fonts.medium,
-    fontSize: 16,
-    color: colors.footer,
+    fontSize: 14,
+    fontFamily: fonts.regular,
+    color: colors.secondary,
+    marginTop: 24,
+    textAlign: 'center',
   },
   termsContainer: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    alignSelf: 'center',
-    width: '90%',
-    marginTop: 20,
+    marginTop: 28,
+    marginLeft: 20,
+    marginRight: 20,
   },
   termsText: {
     fontSize: 12,
     color: colors.secondary,
     fontFamily: fonts.regular,
+    textAlign: 'center',
   },
-  termsRow: {
-    flexDirection: 'row',
+  termsLink: {
+    fontSize: 12,
+    color: colors.secondary,
+    fontFamily: fonts.regular,
+    textDecorationLine: 'underline',
   },
   footer: {
     height: 100,
     backgroundColor: colors.secondaryTenPercent,
     flexDirection: 'row',
-    justifyContent: 'center',
     alignItems: 'center',
-    gap: 5,
+    justifyContent: 'center',
+    position: 'absolute',
+    paddingBottom: 20,
+    gap: 10,
+    bottom: 0,
+    left: 0,
+    right: 0,
   },
   footerText: {
-    color: colors.primary,
-    fontFamily: fonts.regular,
     fontSize: 16,
+    fontFamily: fonts.regular,
+    color: colors.footer,
   },
   footerLink: {
-    fontFamily: fonts.bold,
     fontSize: 16,
+    fontFamily: fonts.semibold,
     color: colors.footer,
   },
 }); 
