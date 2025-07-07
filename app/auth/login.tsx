@@ -22,6 +22,14 @@ export default function Login() {
   });
   const [formErrors, setFormErrors] = useState<{ [key: string]: string }>({});
   const [hidePassword, setHidePassword] = useState(true);
+  const [isEmailValid, setIsEmailValid] = useState(false);
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    const isValid = emailRegex.test(email.trim());
+    setIsEmailValid(isValid);
+    return isValid;
+  };
 
   const validateForm = () => {
     const errors: { [key: string]: string } = {};
@@ -88,11 +96,21 @@ export default function Login() {
               value={formData.email}
               onChangeText={(text) => {
                 setFormData({...formData, email: text});
+                validateEmail(text);
                 if (formErrors.email) {
                   setFormErrors({...formErrors, email: ''});
                 }
               }}
             />
+            {isEmailValid && (
+              <View style={styles.emailCheckContainer}>
+                <MaterialIcons
+                  name="check-circle"
+                  size={24}
+                  color={colors.clock}
+                />
+              </View>
+            )}
           </View>
 
           {/* PASSWORD INPUT */}
@@ -222,6 +240,9 @@ const styles = StyleSheet.create({
   },
   inputError: {
     borderColor: colors.red,
+  },
+  emailCheckContainer: {
+    padding: 5,
   },
   signInButton: {
     backgroundColor: colors.lime,
